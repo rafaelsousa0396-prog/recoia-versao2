@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import Patients from "./pages/Patients";
 import PatientRecord from "./pages/PatientRecord";
 import BedManagement from "./pages/BedManagement";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
