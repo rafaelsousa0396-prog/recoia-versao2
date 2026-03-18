@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, BedDouble, FileText, Brain, Activity } from "lucide-react";
+import { LayoutDashboard, Users, BedDouble, Brain } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import {
@@ -17,12 +17,6 @@ const mainItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Pacientes", url: "/pacientes", icon: Users },
   { title: "Leitos", url: "/leitos", icon: BedDouble },
-];
-
-const clinicalItems = [
-  { title: "Evolução IA", url: "/evolucao", icon: Brain },
-  { title: "Exames", url: "/exames", icon: FileText },
-  { title: "Sinais Vitais", url: "/vitais", icon: Activity },
 ];
 
 export function AppSidebar() {
@@ -52,24 +46,6 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {mainItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)}>
-                    <NavLink to={item.url} end>
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Clínico</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {clinicalItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={isActive(item.url)}>
                     <NavLink to={item.url} end>
