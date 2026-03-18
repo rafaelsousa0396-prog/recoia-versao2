@@ -23,9 +23,13 @@ const App = () => (
           <div className="min-h-screen flex w-full">
             <AppSidebar />
             <div className="flex-1 flex flex-col min-w-0">
-              <header className="h-12 flex items-center border-b bg-card/80 backdrop-blur-sm sticky top-0 z-10">
-                <SidebarTrigger className="ml-3" />
-                <span className="ml-3 text-xs text-muted-foreground">Hospital Central • 18/03/2026</span>
+              <header className="h-12 flex items-center border-b bg-card/80 backdrop-blur-sm sticky top-0 z-10 px-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
+                    <span className="text-[10px] font-bold text-primary-foreground">HC</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">Hospital Central • 18/03/2026</span>
+                </div>
               </header>
               <main className="flex-1 overflow-auto">
                 <Routes>
