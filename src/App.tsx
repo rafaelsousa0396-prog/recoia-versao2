@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import Dashboard from "./pages/Dashboard";
+import Patients from "./pages/Patients";
 import PatientRecord from "./pages/PatientRecord";
 import BedManagement from "./pages/BedManagement";
 import NotFound from "./pages/NotFound";
@@ -29,7 +30,7 @@ const App = () => (
               <main className="flex-1 overflow-auto">
                 <Routes>
                   <Route path="/" element={<Dashboard />} />
-                  <Route path="/pacientes" element={<Dashboard />} />
+                  <Route path="/pacientes" element={<Patients />} />
                   <Route path="/paciente/:id/*" element={<PatientRecord />} />
                   <Route path="/leitos" element={<BedManagement />} />
                   <Route path="*" element={<NotFound />} />
