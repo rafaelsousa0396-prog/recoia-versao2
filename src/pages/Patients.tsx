@@ -11,17 +11,23 @@ export default function Patients() {
   const [sectorFilter, setSectorFilter] = useState("Todos");
   const [doctorFilter, setDoctorFilter] = useState("Todos");
   const [riskFilter, setRiskFilter] = useState("Todos");
+  const [nameSort, setNameSort] = useState<"asc" | "desc">("asc");
 
-  const filtered = patients.filter((p) => {
-    if (sectorFilter !== "Todos" && p.sector !== sectorFilter) return false;
-    if (doctorFilter !== "Todos" && p.doctor !== doctorFilter) return false;
-    if (riskFilter !== "Todos" && p.risk !== riskFilter) return false;
-    if (search) {
-      const q = search.toLowerCase();
-      return p.name.toLowerCase().includes(q) || p.bed.toLowerCase().includes(q) || p.diagnosis.toLowerCase().includes(q);
-    }
-    return true;
-  });
+  const filtered = useMemo(() => {
+    const list = patients.filter((p) => {
+      if (sectorFilter !== "Todos" && p.sector !== sectorFilter) return false;
+      if (doctorFilter !== "Todos" && p.doctor !== doctorFilter) return false;
+      if (riskFilter !== "Todos" && p.risk !== riskFilter) return false;
+      if (search) {
+        const q = search.toLowerCase();
+        return p.name.toLowerCase().includes(q) || p.bed.toLowerCase().includes(q) || p.diagnosis.toLowerCase().includes(q);
+      }
+      return true;
+    });
+    return list.sort((a, b) =>
+      nameSort === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)
+    );
+  }, [search, sectorFilter, doctorFilter, riskFilter, nameSort]);
 
   return (
     <div className="p-6 space-y-5 max-w-[1400px] mx-auto">
