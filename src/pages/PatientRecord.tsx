@@ -7,6 +7,7 @@ import { SparkLine } from "@/components/SparkLine";
 const tabs = [
   { label: "Resumo", path: "", icon: ClipboardList },
   { label: "Evolução IA", path: "/evolucao", icon: Brain },
+  { label: "Prescrições", path: "/prescricoes", icon: Pill },
   { label: "Exames", path: "/exames", icon: FileText },
   { label: "Sinais Vitais", path: "/vitais", icon: Activity },
 ];
