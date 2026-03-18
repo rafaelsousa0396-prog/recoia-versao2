@@ -8,9 +8,6 @@ import { AppSidebar } from "@/components/AppSidebar";
 import Dashboard from "./pages/Dashboard";
 import PatientRecord from "./pages/PatientRecord";
 import BedManagement from "./pages/BedManagement";
-import AIEvolution from "./pages/AIEvolution";
-import ExamsView from "./pages/ExamsView";
-import VitalsView from "./pages/VitalsView";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,11 +30,8 @@ const App = () => (
                 <Routes>
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/pacientes" element={<Dashboard />} />
-                  <Route path="/paciente/:id" element={<PatientRecord />} />
+                  <Route path="/paciente/:id/*" element={<PatientRecord />} />
                   <Route path="/leitos" element={<BedManagement />} />
-                  <Route path="/evolucao" element={<AIEvolution />} />
-                  <Route path="/exames" element={<ExamsView />} />
-                  <Route path="/vitais" element={<VitalsView />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
