@@ -135,6 +135,8 @@ export const patients: Patient[] = [
     name: "Roberto Almeida",
     age: 55,
     gender: "M",
+    birthDate: "1971-07-28",
+    motherName: "Dona Fátima Almeida",
     bed: "EMG-02",
     sector: "Emergência",
     diagnosis: "AVC isquêmico",
