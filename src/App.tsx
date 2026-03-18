@@ -6,9 +6,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import Dashboard from "./pages/Dashboard";
+import Patients from "./pages/Patients";
 import PatientRecord from "./pages/PatientRecord";
 import BedManagement from "./pages/BedManagement";
-import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
