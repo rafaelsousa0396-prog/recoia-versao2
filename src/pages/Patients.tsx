@@ -69,7 +69,15 @@ export default function Patients() {
           <table className="w-full">
             <thead>
               <tr className="border-b bg-secondary/50">
-                <th className="text-left px-4 py-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Paciente</th>
+                <th
+                  className="text-left px-4 py-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer select-none hover:text-foreground transition-colors"
+                  onClick={() => setNameSort(prev => prev === "asc" ? "desc" : "asc")}
+                >
+                  <span className="inline-flex items-center gap-1">
+                    Paciente
+                    {nameSort === "asc" ? <ArrowUpAZ className="w-3 h-3" /> : <ArrowDownZA className="w-3 h-3" />}
+                  </span>
+                </th>
                 <th className="text-left px-4 py-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Leito</th>
                 <th className="text-left px-4 py-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Setor</th>
                 <th className="text-left px-4 py-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Diagnóstico</th>
