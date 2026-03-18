@@ -84,6 +84,8 @@ export const patients: Patient[] = [
     name: "Maria Oliveira",
     age: 45,
     gender: "F",
+    birthDate: "1981-02-20",
+    motherName: "Tereza Oliveira",
     bed: "4A-12",
     sector: "4º Andar",
     diagnosis: "Pós-op colecistectomia",
