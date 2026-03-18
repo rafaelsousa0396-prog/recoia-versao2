@@ -1,5 +1,7 @@
 import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
-import { ArrowLeft, Heart, Droplets, Thermometer, Activity, Brain, FileText, ClipboardList, Pill, Clock, AlertTriangle, CheckCircle2 as Check2 } from "lucide-react";
+import { ArrowLeft, Heart, Droplets, Thermometer, Activity, Brain, FileText, ClipboardList, Pill, Clock, AlertTriangle, CheckCircle2 as Check2, Calendar, User } from "lucide-react";
+import { differenceInDays, format, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { motion } from "framer-motion";
 import { patients, evolutions, exams, prescriptions } from "@/data/mockData";
 import { SparkLine } from "@/components/SparkLine";
@@ -29,6 +31,7 @@ export default function PatientRecord() {
   const currentTab = subPath || "";
   const riskLabels = { high: "Alto", medium: "Moderado", stable: "Estável" };
   const riskClasses = { high: "risk-badge-high", medium: "risk-badge-medium", stable: "risk-badge-stable" };
+  const stayDays = differenceInDays(new Date(), parseISO(patient.admissionDate));
 
   return (
     <div className="p-6 max-w-[1400px] mx-auto space-y-6">
@@ -41,10 +44,15 @@ export default function PatientRecord() {
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-semibold text-foreground">{patient.name}</h1>
             <span className={riskClasses[patient.risk]}>{riskLabels[patient.risk]}</span>
-          </div>
+        </div>
           <p className="text-xs text-muted-foreground">
             {patient.age} anos · {patient.gender === "M" ? "Masculino" : "Feminino"} · Leito {patient.bed} · {patient.sector} · {patient.diagnosis}
           </p>
+          <div className="flex flex-wrap gap-x-4 gap-y-0.5 mt-1 text-xs text-muted-foreground">
+            <span>📅 Nascimento: {format(parseISO(patient.birthDate), "dd/MM/yyyy")}</span>
+            <span>🏥 Internação: {format(parseISO(patient.admissionDate), "dd/MM/yyyy")} ({stayDays} {stayDays === 1 ? "dia" : "dias"})</span>
+            <span>👩 Mãe: {patient.motherName}</span>
+          </div>
         </div>
         <div className="text-right">
           <p className="text-xs text-muted-foreground">Médico responsável</p>

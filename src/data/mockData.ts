@@ -3,6 +3,8 @@ export interface Patient {
   name: string;
   age: number;
   gender: "M" | "F";
+  birthDate: string;
+  motherName: string;
   bed: string;
   sector: string;
   diagnosis: string;
@@ -65,6 +67,8 @@ export const patients: Patient[] = [
     name: "João Silva",
     age: 68,
     gender: "M",
+    birthDate: "1958-05-12",
+    motherName: "Conceição Silva",
     bed: "UTI-01",
     sector: "UTI",
     diagnosis: "Pneumonia + Sepse",
@@ -80,6 +84,8 @@ export const patients: Patient[] = [
     name: "Maria Oliveira",
     age: 45,
     gender: "F",
+    birthDate: "1981-02-20",
+    motherName: "Tereza Oliveira",
     bed: "4A-12",
     sector: "4º Andar",
     diagnosis: "Pós-op colecistectomia",
@@ -95,6 +101,8 @@ export const patients: Patient[] = [
     name: "Pedro Santos",
     age: 72,
     gender: "M",
+    birthDate: "1954-08-03",
+    motherName: "Aparecida Santos",
     bed: "UTI-03",
     sector: "UTI",
     diagnosis: "IAM + ICC descompensada",
@@ -110,6 +118,8 @@ export const patients: Patient[] = [
     name: "Ana Beatriz Lima",
     age: 34,
     gender: "F",
+    birthDate: "1992-11-15",
+    motherName: "Márcia Lima",
     bed: "4A-05",
     sector: "4º Andar",
     diagnosis: "Apendicectomia - POI",
@@ -125,6 +135,8 @@ export const patients: Patient[] = [
     name: "Roberto Almeida",
     age: 55,
     gender: "M",
+    birthDate: "1971-07-28",
+    motherName: "Dona Fátima Almeida",
     bed: "EMG-02",
     sector: "Emergência",
     diagnosis: "AVC isquêmico",
@@ -140,6 +152,8 @@ export const patients: Patient[] = [
     name: "Francisca Rodrigues",
     age: 82,
     gender: "F",
+    birthDate: "1944-01-10",
+    motherName: "Rosa Rodrigues",
     bed: "4A-08",
     sector: "4º Andar",
     diagnosis: "Fratura de fêmur",
