@@ -1,7 +1,7 @@
 import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
-import { ArrowLeft, Heart, Droplets, Thermometer, Activity, Brain, FileText, ClipboardList } from "lucide-react";
+import { ArrowLeft, Heart, Droplets, Thermometer, Activity, Brain, FileText, ClipboardList, Pill, Clock, AlertTriangle, CheckCircle2 as Check2 } from "lucide-react";
 import { motion } from "framer-motion";
-import { patients, evolutions, exams } from "@/data/mockData";
+import { patients, evolutions, exams, prescriptions } from "@/data/mockData";
 import { SparkLine } from "@/components/SparkLine";
 
 const tabs = [
