@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Search, Filter } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Search, Filter, ArrowUpAZ, ArrowDownZA } from "lucide-react";
 import { motion } from "framer-motion";
 import { PatientRow } from "@/components/PatientRow";
 import { patients, sectors, doctors, riskLevels } from "@/data/mockData";
