@@ -11,7 +11,17 @@ export default function Patients() {
   const [sectorFilter, setSectorFilter] = useState("Todos");
   const [doctorFilter, setDoctorFilter] = useState("Todos");
   const [riskFilter, setRiskFilter] = useState("Todos");
-  const [nameSort, setNameSort] = useState<"asc" | "desc">("asc");
+  const [sortCol, setSortCol] = useState<"name" | "bed">("name");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+
+  const toggleSort = (col: "name" | "bed") => {
+    if (sortCol === col) {
+      setSortDir(prev => prev === "asc" ? "desc" : "asc");
+    } else {
+      setSortCol(col);
+      setSortDir("asc");
+    }
+  };
 
   const filtered = useMemo(() => {
     const list = patients.filter((p) => {
@@ -24,10 +34,16 @@ export default function Patients() {
       }
       return true;
     });
-    return list.sort((a, b) =>
-      nameSort === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)
-    );
-  }, [search, sectorFilter, doctorFilter, riskFilter, nameSort]);
+    return list.sort((a, b) => {
+      if (sortCol === "name") {
+        return sortDir === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
+      }
+      // Sort bed numerically (extract numbers)
+      const numA = parseInt(a.bed.replace(/\D/g, "")) || 0;
+      const numB = parseInt(b.bed.replace(/\D/g, "")) || 0;
+      return sortDir === "asc" ? numA - numB : numB - numA;
+    });
+  }, [search, sectorFilter, doctorFilter, riskFilter, sortCol, sortDir]);
 
   return (
     <div className="p-6 space-y-5 max-w-[1400px] mx-auto">
