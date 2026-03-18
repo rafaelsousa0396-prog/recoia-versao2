@@ -76,6 +76,7 @@ export default function PatientRecord() {
       {/* Tab Content */}
       {currentTab === "" && <SummaryTab patient={patient} />}
       {currentTab === "evolucao" && <EvolutionTab patient={patient} />}
+      {currentTab === "prescricoes" && <PrescriptionsTab patientId={patient.id} />}
       {currentTab === "exames" && <ExamsTab />}
       {currentTab === "vitais" && <VitalsTab patient={patient} />}
     </div>
