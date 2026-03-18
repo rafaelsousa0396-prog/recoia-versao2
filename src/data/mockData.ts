@@ -206,6 +206,37 @@ export const exams: Exam[] = [
   { id: "x10", name: "Glicemia", date: "2026-03-18", value: "165", unit: "mg/dL", reference: "70-100", status: "altered" },
 ];
 
+export interface Prescription {
+  id: string;
+  patientId: string;
+  medication: string;
+  dose: string;
+  route: string;
+  frequency: string;
+  schedule: string[];
+  startDate: string;
+  endDate?: string;
+  status: "active" | "suspended" | "completed";
+  prescribedBy: string;
+  notes?: string;
+  category: "antibiotic" | "analgesic" | "cardiovascular" | "fluid" | "other";
+}
+
+export const prescriptions: Prescription[] = [
+  { id: "p1", patientId: "1", medication: "Meropenem", dose: "1g", route: "EV", frequency: "8/8h", schedule: ["06:00", "14:00", "22:00"], startDate: "2026-03-18", status: "active", prescribedBy: "Dra. Ana Costa", category: "antibiotic", notes: "Escalonado após antibiograma" },
+  { id: "p2", patientId: "1", medication: "Noradrenalina", dose: "0.3 mcg/kg/min", route: "EV BIC", frequency: "Contínuo", schedule: [], startDate: "2026-03-16", status: "active", prescribedBy: "Dra. Ana Costa", category: "cardiovascular", notes: "Meta PAM > 65 mmHg" },
+  { id: "p3", patientId: "1", medication: "Dipirona", dose: "1g", route: "EV", frequency: "6/6h se Tax ≥ 37.8°C", schedule: ["06:00", "12:00", "18:00", "00:00"], startDate: "2026-03-15", status: "active", prescribedBy: "Dra. Ana Costa", category: "analgesic" },
+  { id: "p4", patientId: "1", medication: "SF 0.9%", dose: "500ml", route: "EV", frequency: "12/12h", schedule: ["08:00", "20:00"], startDate: "2026-03-15", status: "active", prescribedBy: "Dra. Ana Costa", category: "fluid" },
+  { id: "p5", patientId: "1", medication: "Omeprazol", dose: "40mg", route: "EV", frequency: "1x/dia", schedule: ["06:00"], startDate: "2026-03-15", status: "active", prescribedBy: "Dra. Ana Costa", category: "other" },
+  { id: "p6", patientId: "1", medication: "Piperacilina-Tazobactam", dose: "4.5g", route: "EV", frequency: "6/6h", schedule: ["06:00", "12:00", "18:00", "00:00"], startDate: "2026-03-15", endDate: "2026-03-17", status: "completed", prescribedBy: "Dra. Ana Costa", category: "antibiotic", notes: "Substituído por Meropenem" },
+  { id: "p7", patientId: "2", medication: "Cetoprofeno", dose: "100mg", route: "EV", frequency: "12/12h", schedule: ["08:00", "20:00"], startDate: "2026-03-16", status: "active", prescribedBy: "Dr. Carlos Mendes", category: "analgesic" },
+  { id: "p8", patientId: "2", medication: "Ondansetrona", dose: "4mg", route: "EV", frequency: "8/8h se náusea", schedule: ["08:00", "16:00", "00:00"], startDate: "2026-03-16", status: "active", prescribedBy: "Dr. Carlos Mendes", category: "other" },
+  { id: "p9", patientId: "3", medication: "Furosemida", dose: "40mg", route: "EV", frequency: "12/12h", schedule: ["08:00", "20:00"], startDate: "2026-03-14", status: "active", prescribedBy: "Dra. Ana Costa", category: "cardiovascular" },
+  { id: "p10", patientId: "3", medication: "Enoxaparina", dose: "60mg", route: "SC", frequency: "12/12h", schedule: ["08:00", "20:00"], startDate: "2026-03-14", status: "active", prescribedBy: "Dra. Ana Costa", category: "cardiovascular" },
+  { id: "p11", patientId: "5", medication: "Alteplase (rt-PA)", dose: "0.9 mg/kg", route: "EV", frequency: "Dose única", schedule: ["08:00"], startDate: "2026-03-18", status: "active", prescribedBy: "Dra. Juliana Pires", category: "cardiovascular", notes: "Trombolítico - janela terapêutica" },
+  { id: "p12", patientId: "6", medication: "Enoxaparina", dose: "40mg", route: "SC", frequency: "1x/dia", schedule: ["20:00"], startDate: "2026-03-13", status: "active", prescribedBy: "Dr. Carlos Mendes", category: "cardiovascular", notes: "Profilaxia TEP" },
+];
+
 export const sectors = ["Todos", "UTI", "4º Andar", "Emergência"];
 export const riskLevels = ["Todos", "high", "medium", "stable"];
 export const doctors = ["Todos", "Dra. Ana Costa", "Dr. Carlos Mendes", "Dr. Rafael Souza", "Dra. Juliana Pires"];
