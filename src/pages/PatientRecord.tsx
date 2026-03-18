@@ -289,6 +289,160 @@ function EvolutionTab({ patient }: { patient: typeof patients[0] }) {
   );
 }
 
+/* ============ PRESCRIPTIONS TAB ============ */
+function PrescriptionsTab({ patientId }: { patientId: string }) {
+  const [filter, setFilter] = useState<"all" | "active" | "completed">("active");
+  const patientPrescriptions = prescriptions.filter((p) => p.patientId === patientId);
+  const filtered = patientPrescriptions.filter((p) =>
+    filter === "all" ? true : filter === "active" ? p.status === "active" : p.status === "completed" || p.status === "suspended"
+  );
+
+  const categoryColors: Record<string, string> = {
+    antibiotic: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20",
+    analgesic: "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20",
+    cardiovascular: "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20",
+    fluid: "bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border-cyan-500/20",
+    other: "bg-secondary text-muted-foreground border-border",
+  };
+
+  const categoryLabels: Record<string, string> = {
+    antibiotic: "Antibiótico",
+    analgesic: "Analgésico",
+    cardiovascular: "Cardiovascular",
+    fluid: "Hidratação",
+    other: "Outros",
+  };
+
+  const statusConfig = {
+    active: { label: "Ativo", cls: "risk-badge-stable" },
+    suspended: { label: "Suspenso", cls: "risk-badge-medium" },
+    completed: { label: "Concluído", cls: "bg-secondary text-muted-foreground text-[10px] px-2 py-0.5 rounded-full font-medium" },
+  };
+
+  const now = new Date();
+  const currentHour = `${String(now.getHours()).padStart(2, "0")}:00`;
+
+  return (
+    <div className="space-y-5">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Pill className="w-5 h-5 text-primary" />
+          <div>
+            <h2 className="text-sm font-semibold text-foreground">Prescrições Médicas</h2>
+            <p className="text-xs text-muted-foreground">Medicamentos, dosagens e aprazamento</p>
+          </div>
+        </div>
+        <div className="flex gap-1 bg-secondary rounded-lg p-0.5">
+          {(["active", "all", "completed"] as const).map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                filter === f ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {f === "active" ? "Ativos" : f === "all" ? "Todos" : "Concluídos"}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Schedule Timeline */}
+      {filter !== "completed" && (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card border rounded-xl p-4 clinical-shadow">
+          <div className="flex items-center gap-2 mb-3">
+            <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Aprazamento — Próximos Horários</span>
+          </div>
+          <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+            {["06:00", "08:00", "12:00", "14:00", "16:00", "18:00", "20:00", "22:00"].map((time) => {
+              const medsAtTime = filtered.filter((p) => p.status === "active" && p.schedule.includes(time));
+              const isPast = time < currentHour;
+              return (
+                <div key={time} className={`rounded-lg border p-2 text-center ${isPast ? "opacity-50" : ""} ${medsAtTime.length > 0 ? "border-primary/30 bg-primary/5" : "border-border"}`}>
+                  <p className="text-[10px] font-mono font-semibold text-muted-foreground">{time}</p>
+                  {medsAtTime.length > 0 ? (
+                    <div className="mt-1 space-y-0.5">
+                      {medsAtTime.map((m) => (
+                        <p key={m.id} className="text-[10px] text-foreground truncate" title={`${m.medication} ${m.dose}`}>
+                          {m.medication.split(" ")[0]}
+                        </p>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-[10px] text-muted-foreground/40 mt-1">—</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </motion.div>
+      )}
+
+      {/* Medication List */}
+      <div className="space-y-3">
+        {filtered.length === 0 ? (
+          <div className="text-center py-10 text-muted-foreground text-sm">Nenhuma prescrição encontrada.</div>
+        ) : (
+          filtered.map((rx, i) => (
+            <motion.div
+              key={rx.id}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.04 }}
+              className={`bg-card border rounded-xl p-4 clinical-shadow ${rx.status === "completed" ? "opacity-60" : ""}`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-sm font-semibold text-foreground">{rx.medication}</h3>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${categoryColors[rx.category]}`}>
+                      {categoryLabels[rx.category]}
+                    </span>
+                    <span className={statusConfig[rx.status].cls}>{statusConfig[rx.status].label}</span>
+                  </div>
+                  <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-1">
+                    <div>
+                      <span className="text-[10px] text-muted-foreground uppercase">Dose</span>
+                      <p className="text-sm font-mono font-medium text-foreground">{rx.dose}</p>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-muted-foreground uppercase">Via</span>
+                      <p className="text-sm text-foreground">{rx.route}</p>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-muted-foreground uppercase">Frequência</span>
+                      <p className="text-sm text-foreground">{rx.frequency}</p>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-muted-foreground uppercase">Horários</span>
+                      <p className="text-sm font-mono text-foreground">
+                        {rx.schedule.length > 0 ? rx.schedule.join(" · ") : "Contínuo"}
+                      </p>
+                    </div>
+                  </div>
+                  {rx.notes && (
+                    <div className="mt-2 flex items-start gap-1.5">
+                      <AlertTriangle className="w-3 h-3 text-muted-foreground mt-0.5 flex-shrink-0" />
+                      <p className="text-xs text-muted-foreground italic">{rx.notes}</p>
+                    </div>
+                  )}
+                </div>
+                <div className="text-right flex-shrink-0">
+                  <p className="text-[10px] text-muted-foreground">{rx.prescribedBy}</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {rx.startDate}{rx.endDate ? ` → ${rx.endDate}` : ""}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ============ EXAMS TAB ============ */
 function ExamsTab() {
   return (
