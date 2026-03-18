@@ -31,6 +31,7 @@ export default function PatientRecord() {
   const currentTab = subPath || "";
   const riskLabels = { high: "Alto", medium: "Moderado", stable: "Estável" };
   const riskClasses = { high: "risk-badge-high", medium: "risk-badge-medium", stable: "risk-badge-stable" };
+  const stayDays = differenceInDays(new Date(), parseISO(patient.admissionDate));
 
   return (
     <div className="p-6 max-w-[1400px] mx-auto space-y-6">
