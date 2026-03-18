@@ -30,12 +30,12 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarContent>
         {/* Logo */}
-        <div className="flex items-center gap-2 px-4 py-5 border-b border-sidebar-border">
+        <div className={`flex items-center ${collapsed ? 'justify-center px-0' : 'px-4'} gap-2 py-5 border-b border-sidebar-border`}>
           <div className="w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center flex-shrink-0">
             <Brain className="w-4 h-4 text-sidebar-primary-foreground" />
           </div>
           {!collapsed && (
-            <div>
+            <div className="overflow-hidden">
               <h1 className="text-sm font-semibold text-sidebar-primary-foreground tracking-tight">Reco.IA</h1>
               <p className="text-[10px] text-sidebar-foreground/60">Prontuário Inteligente</p>
             </div>
