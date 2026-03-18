@@ -14,6 +14,17 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+function LiveClock() {
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  const date = now.toLocaleDateString("pt-BR");
+  const time = now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  return <span className="text-xs text-muted-foreground">Hospital Central • {date} • {time}</span>;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -29,7 +40,7 @@ const App = () => (
                   <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
                     <span className="text-[10px] font-bold text-primary-foreground">HC</span>
                   </div>
-                  <span className="text-xs text-muted-foreground">Hospital Central • 18/03/2026</span>
+                  <LiveClock />
                 </div>
               </header>
               <main className="flex-1 overflow-auto">
