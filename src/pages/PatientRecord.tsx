@@ -44,7 +44,7 @@ export default function PatientRecord() {
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-semibold text-foreground">{patient.name}</h1>
             <span className={riskClasses[patient.risk]}>{riskLabels[patient.risk]}</span>
-          </div>
+        </div>
           <p className="text-xs text-muted-foreground">
             {patient.age} anos · {patient.gender === "M" ? "Masculino" : "Feminino"} · Leito {patient.bed} · {patient.sector} · {patient.diagnosis}
           </p>
