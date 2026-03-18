@@ -152,6 +152,8 @@ export const patients: Patient[] = [
     name: "Francisca Rodrigues",
     age: 82,
     gender: "F",
+    birthDate: "1944-01-10",
+    motherName: "Rosa Rodrigues",
     bed: "4A-08",
     sector: "4º Andar",
     diagnosis: "Fratura de fêmur",

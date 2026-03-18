@@ -48,6 +48,11 @@ export default function PatientRecord() {
           <p className="text-xs text-muted-foreground">
             {patient.age} anos · {patient.gender === "M" ? "Masculino" : "Feminino"} · Leito {patient.bed} · {patient.sector} · {patient.diagnosis}
           </p>
+          <div className="flex flex-wrap gap-x-4 gap-y-0.5 mt-1 text-xs text-muted-foreground">
+            <span>📅 Nascimento: {format(parseISO(patient.birthDate), "dd/MM/yyyy")}</span>
+            <span>🏥 Internação: {format(parseISO(patient.admissionDate), "dd/MM/yyyy")} ({stayDays} {stayDays === 1 ? "dia" : "dias"})</span>
+            <span>👩 Mãe: {patient.motherName}</span>
+          </div>
         </div>
         <div className="text-right">
           <p className="text-xs text-muted-foreground">Médico responsável</p>
