@@ -3,6 +3,8 @@ export interface Patient {
   name: string;
   age: number;
   gender: "M" | "F";
+  birthDate: string;
+  motherName: string;
   bed: string;
   sector: string;
   diagnosis: string;
