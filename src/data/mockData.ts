@@ -118,6 +118,8 @@ export const patients: Patient[] = [
     name: "Ana Beatriz Lima",
     age: 34,
     gender: "F",
+    birthDate: "1992-11-15",
+    motherName: "Márcia Lima",
     bed: "4A-05",
     sector: "4º Andar",
     diagnosis: "Apendicectomia - POI",
