@@ -140,7 +140,7 @@ function SummaryTab({ patient }: { patient: typeof patients[0] }) {
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Exames Laboratoriais</h2>
-            <span className="text-xs text-muted-foreground">Coleta mais recente: <span className="font-medium text-foreground">15/03/2026 — 06:30</span></span>
+            <span className="text-xs text-muted-foreground">Coleta mais recente: <span className="font-medium text-foreground">15/03/2026</span></span>
           </div>
           <div className="bg-card border rounded-xl clinical-shadow overflow-hidden">
             <table className="w-full">
