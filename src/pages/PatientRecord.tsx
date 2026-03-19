@@ -234,19 +234,6 @@ function EvolutionTab({ patient }: { patient: typeof patients[0] }) {
         </div>
       </div>
 
-      <div className="bg-clinical-muted border border-primary/10 rounded-xl p-4">
-        <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Contexto do Paciente</p>
-        <p className="text-sm text-foreground">
-          <strong>{patient.name}</strong>, {patient.age} anos, {patient.gender === "M" ? "masculino" : "feminino"}.
-          Leito {patient.bed} ({patient.sector}). Diagnóstico: {patient.diagnosis}.
-          Risco: {patient.risk === "high" ? "Alto" : patient.risk === "medium" ? "Moderado" : "Estável"}.
-        </p>
-        {patient.alerts.length > 0 && (
-          <div className="mt-2 text-xs text-risk-high">
-            {patient.alerts.map((a, i) => <p key={i}>⚠ {a}</p>)}
-          </div>
-        )}
-      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div>
