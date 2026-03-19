@@ -37,7 +37,7 @@ export default function PatientRecord() {
     <div className="p-6 max-w-[1400px] mx-auto space-y-6">
       {/* Header */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-4">
-        <button onClick={() => navigate("/")} className="p-2 rounded-lg hover:bg-secondary transition-colors">
+        <button onClick={() => navigate("/pacientes")} className="p-2 rounded-lg hover:bg-secondary transition-colors">
           <ArrowLeft className="w-4 h-4 text-muted-foreground" />
         </button>
         <div className="flex-1">
