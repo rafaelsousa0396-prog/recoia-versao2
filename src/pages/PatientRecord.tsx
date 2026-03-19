@@ -301,6 +301,7 @@ function EvolutionTab({ patient }: { patient: typeof patients[0] }) {
 /* ============ PRESCRIPTIONS TAB ============ */
 function PrescriptionsTab({ patientId }: { patientId: string }) {
   const [filter, setFilter] = useState<"all" | "active" | "completed">("active");
+  const [openRxDates, setOpenRxDates] = React.useState<string[]>([]);
   const patientPrescriptions = prescriptions.filter((p) => p.patientId === patientId);
   const filtered = patientPrescriptions.filter((p) =>
     filter === "all" ? true : filter === "active" ? p.status === "active" : p.status === "completed" || p.status === "suspended"
