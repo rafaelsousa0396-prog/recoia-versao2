@@ -361,65 +361,50 @@ function PrescriptionsTab({ patientId }: { patientId: string }) {
             <p className="text-xs text-muted-foreground">Medicamentos, dosagens e aprazamento</p>
           </div>
         </div>
-        <div className="flex gap-1 bg-secondary rounded-lg p-0.5">
-          {(["active", "all", "completed"] as const).map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-3 py-1 text-xs rounded-md transition-colors ${
-                filter === f ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {f === "active" ? "Ativos" : f === "all" ? "Todos" : "Concluídos"}
-            </button>
-          ))}
+        <div className="flex items-center gap-3 flex-wrap">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className={cn("h-8 text-xs gap-2", dateFilter && "border-primary text-primary")}>
+                <Calendar className="w-3.5 h-3.5" />
+                {dateFilter ? format(dateFilter, "dd/MM/yyyy") : "Filtrar por data"}
+                {dateFilter && (
+                  <span
+                    role="button"
+                    className="ml-1 hover:text-destructive"
+                    onClick={(e) => { e.stopPropagation(); setDateFilter(undefined); }}
+                  >
+                    ×
+                  </span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <DayPicker
+                mode="single"
+                selected={dateFilter}
+                onSelect={setDateFilter}
+                initialFocus
+                className={cn("p-3 pointer-events-auto")}
+              />
+            </PopoverContent>
+          </Popover>
+
+          <Select value={roleFilter} onValueChange={setRoleFilter}>
+            <SelectTrigger className={cn("h-8 w-auto min-w-[180px] text-xs", roleFilter !== "all" && "border-primary text-primary")}>
+              <User className="w-3.5 h-3.5 mr-1.5" />
+              <SelectValue placeholder="Tipo de profissional" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os tipos</SelectItem>
+              <SelectItem value="Médico">Médico</SelectItem>
+              <SelectItem value="Enfermagem">Enfermagem</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
-      {/* Date & Doctor Filters */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className={cn("h-8 text-xs gap-2", dateFilter && "border-primary text-primary")}>
-              <Calendar className="w-3.5 h-3.5" />
-              {dateFilter ? format(dateFilter, "dd/MM/yyyy") : "Filtrar por data"}
-              {dateFilter && (
-                <span
-                  role="button"
-                  className="ml-1 hover:text-destructive"
-                  onClick={(e) => { e.stopPropagation(); setDateFilter(undefined); }}
-                >
-                  ×
-                </span>
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <DayPicker
-              mode="single"
-              selected={dateFilter}
-              onSelect={setDateFilter}
-              initialFocus
-              className={cn("p-3 pointer-events-auto")}
-            />
-          </PopoverContent>
-        </Popover>
-
-        <Select value={roleFilter} onValueChange={setRoleFilter}>
-          <SelectTrigger className={cn("h-8 w-auto min-w-[180px] text-xs", roleFilter !== "all" && "border-primary text-primary")}>
-            <User className="w-3.5 h-3.5 mr-1.5" />
-            <SelectValue placeholder="Tipo de profissional" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os tipos</SelectItem>
-            <SelectItem value="Médico">Médico</SelectItem>
-            <SelectItem value="Enfermagem">Enfermagem</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
       {/* Schedule Timeline */}
-      {filter !== "completed" && (
+      {(
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card border rounded-xl p-4 clinical-shadow">
           <div className="flex items-center gap-2 mb-3">
             <Clock className="w-3.5 h-3.5 text-muted-foreground" />
