@@ -405,16 +405,15 @@ function PrescriptionsTab({ patientId }: { patientId: string }) {
           </PopoverContent>
         </Popover>
 
-        <Select value={doctorFilter} onValueChange={setDoctorFilter}>
-          <SelectTrigger className={cn("h-8 w-auto min-w-[180px] text-xs", doctorFilter !== "all" && "border-primary text-primary")}>
+        <Select value={roleFilter} onValueChange={setRoleFilter}>
+          <SelectTrigger className={cn("h-8 w-auto min-w-[180px] text-xs", roleFilter !== "all" && "border-primary text-primary")}>
             <User className="w-3.5 h-3.5 mr-1.5" />
-            <SelectValue placeholder="Profissional" />
+            <SelectValue placeholder="Tipo de profissional" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos os profissionais</SelectItem>
-            {prescribers.map((doc) => (
-              <SelectItem key={doc} value={doc}>{doc}</SelectItem>
-            ))}
+            <SelectItem value="all">Todos os tipos</SelectItem>
+            <SelectItem value="Médico">Médico</SelectItem>
+            <SelectItem value="Enfermagem">Enfermagem</SelectItem>
           </SelectContent>
         </Select>
       </div>
