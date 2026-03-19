@@ -404,7 +404,7 @@ function PrescriptionsTab({ patientId }: { patientId: string }) {
       </div>
 
       {/* Schedule Timeline */}
-      {filter !== "completed" && (
+      {(
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card border rounded-xl p-4 clinical-shadow">
           <div className="flex items-center gap-2 mb-3">
             <Clock className="w-3.5 h-3.5 text-muted-foreground" />
