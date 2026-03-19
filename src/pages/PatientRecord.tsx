@@ -305,17 +305,22 @@ function EvolutionTab({ patient }: { patient: typeof patients[0] }) {
 function PrescriptionsTab({ patientId }: { patientId: string }) {
   const [filter, setFilter] = useState<"all" | "active" | "completed">("active");
   const [dateFilter, setDateFilter] = React.useState<Date | undefined>(undefined);
-  const [doctorFilter, setDoctorFilter] = React.useState<string>("all");
+  const [roleFilter, setRoleFilter] = React.useState<string>("all");
 
   const patientPrescriptions = prescriptions.filter((p) => p.patientId === patientId);
 
-  const prescribers = [...new Set(patientPrescriptions.map((p) => p.prescribedBy))];
+  const getProfessionalRole = (name: string): string => {
+    if (name.startsWith("Dr.") || name.startsWith("Dra.")) return "Médico";
+    if (name.startsWith("Enf.")) return "Enfermagem";
+    if (name.startsWith("Ft.")) return "Fisioterapia";
+    return "Outro";
+  };
 
   const filtered = patientPrescriptions.filter((p) => {
     const statusMatch = filter === "all" ? true : filter === "active" ? p.status === "active" : p.status === "completed" || p.status === "suspended";
     const dateMatch = dateFilter ? p.startDate === format(dateFilter, "yyyy-MM-dd") : true;
-    const doctorMatch = doctorFilter === "all" ? true : p.prescribedBy === doctorFilter;
-    return statusMatch && dateMatch && doctorMatch;
+    const roleMatch = roleFilter === "all" ? true : getProfessionalRole(p.prescribedBy) === roleFilter;
+    return statusMatch && dateMatch && roleMatch;
   });
 
   const allRxDates = [...new Set(filtered.map((r) => r.startDate))].sort((a, b) => b.localeCompare(a));
