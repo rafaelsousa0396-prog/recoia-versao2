@@ -199,6 +199,7 @@ function EvolutionTab({ patient }: { patient: typeof patients[0] }) {
   const [inputText, setInputText] = useState("");
   const [generatedText, setGeneratedText] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [evoRoleFilter, setEvoRoleFilter] = useState<string>("Todos");
 
   const handleGenerate = () => {
     setIsGenerating(true);
@@ -215,6 +216,20 @@ function EvolutionTab({ patient }: { patient: typeof patients[0] }) {
     }, 10);
   };
 
+  const filteredEvolutions = evolutions.filter((e) =>
+    evoRoleFilter === "Todos" ? true : e.role === evoRoleFilter
+  );
+
+  const evolutionsByDate = filteredEvolutions.reduce<Record<string, typeof evolutions>>((acc, evo) => {
+    if (!acc[evo.date]) acc[evo.date] = [];
+    acc[evo.date].push(evo);
+    return acc;
+  }, {});
+
+  const sortedDates = Object.keys(evolutionsByDate).sort((a, b) => b.localeCompare(a));
+
+  const evoRoles = ["Todos", ...Array.from(new Set(evolutions.map((e) => e.role)))];
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2">
@@ -224,8 +239,6 @@ function EvolutionTab({ patient }: { patient: typeof patients[0] }) {
           <p className="text-xs text-muted-foreground">Assistente inteligente para documentação clínica estruturada</p>
         </div>
       </div>
-
-
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div>
@@ -274,6 +287,58 @@ function EvolutionTab({ patient }: { patient: typeof patients[0] }) {
             </AnimatePresence>
           </div>
         </div>
+      </div>
+
+      {/* Histórico de Evoluções */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Histórico de Evoluções</h3>
+          <Select value={evoRoleFilter} onValueChange={setEvoRoleFilter}>
+            <SelectTrigger className={cn("w-[160px] h-8 text-xs", evoRoleFilter !== "Todos" && "border-primary text-primary")}>
+              <User className="w-3 h-3 mr-1" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {evoRoles.map((r) => (
+                <SelectItem key={r} value={r} className="text-xs">{r}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {sortedDates.length === 0 && (
+          <p className="text-sm text-muted-foreground/50 italic text-center py-6">Nenhuma evolução encontrada.</p>
+        )}
+
+        {sortedDates.map((date) => (
+          <div key={date} className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
+              <span className="text-xs font-semibold text-foreground">
+                {format(parseISO(date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+              </span>
+            </div>
+            <div className="space-y-2 ml-5 border-l-2 border-border pl-4">
+              {evolutionsByDate[date].sort((a, b) => b.time.localeCompare(a.time)).map((evo) => (
+                <motion.div
+                  key={evo.id}
+                  initial={{ opacity: 0, x: -5 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="bg-card border rounded-xl p-4 clinical-shadow"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-medium text-foreground">{evo.professional}</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">{evo.role}</span>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground font-mono">{evo.time}</span>
+                  </div>
+                  <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{evo.content}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
