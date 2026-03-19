@@ -453,6 +453,21 @@ function PrescriptionsTab({ patientId }: { patientId: string }) {
 
 /* ============ EXAMS TAB ============ */
 function ExamsTab() {
+  const groupedByDate = exams.reduce<Record<string, typeof exams>>((acc, ex) => {
+    if (!acc[ex.date]) acc[ex.date] = [];
+    acc[ex.date].push(ex);
+    return acc;
+  }, {});
+
+  const sortedDates = Object.keys(groupedByDate).sort((a, b) => b.localeCompare(a));
+  const [openDates, setOpenDates] = React.useState<string[]>(sortedDates.length > 0 ? [sortedDates[0]] : []);
+
+  const toggleDate = (date: string) => {
+    setOpenDates((prev) =>
+      prev.includes(date) ? prev.filter((d) => d !== date) : [...prev, date]
+    );
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
@@ -463,39 +478,76 @@ function ExamsTab() {
         </div>
       </div>
 
-      <div className="bg-card border rounded-xl clinical-shadow overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b bg-secondary/50">
-              <th className="text-left px-4 py-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Exame</th>
-              <th className="text-left px-4 py-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Data</th>
-              <th className="text-left px-4 py-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Resultado</th>
-              <th className="text-left px-4 py-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Referência</th>
-              <th className="text-left px-4 py-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {exams.map((ex, i) => (
-              <motion.tr
-                key={ex.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: i * 0.03 }}
-                className={ex.status === "critical" ? "bg-risk-high/5" : ex.status === "altered" ? "bg-risk-medium/5" : ""}
+      <div className="space-y-3">
+        {sortedDates.map((date) => {
+          const dateExams = groupedByDate[date];
+          const isOpen = openDates.includes(date);
+          const criticalCount = dateExams.filter((e) => e.status === "critical").length;
+          const alteredCount = dateExams.filter((e) => e.status === "altered").length;
+          const formattedDate = format(parseISO(date), "dd/MM/yyyy");
+
+          return (
+            <div key={date} className="bg-card border rounded-xl clinical-shadow overflow-hidden">
+              <button
+                onClick={() => toggleDate(date)}
+                className="w-full flex items-center justify-between px-4 py-3 hover:bg-secondary/30 transition-colors"
               >
-                <td className="px-4 py-3 text-sm font-medium text-foreground">{ex.name}</td>
-                <td className="px-4 py-3 text-xs text-muted-foreground">{ex.date}</td>
-                <td className="px-4 py-3 font-mono text-sm font-semibold tracking-tight">
-                  {ex.value} <span className="text-xs text-muted-foreground font-normal">{ex.unit}</span>
-                </td>
-                <td className="px-4 py-3 text-xs text-muted-foreground">{ex.reference}</td>
-                <td className="px-4 py-3">
-                  <ExamStatus status={ex.status} />
-                </td>
-              </motion.tr>
-            ))}
-          </tbody>
-        </table>
+                <div className="flex items-center gap-3">
+                  <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${isOpen ? "rotate-0" : "-rotate-90"}`} />
+                  <span className="text-sm font-semibold text-foreground">{formattedDate}</span>
+                  <span className="text-xs text-muted-foreground">{dateExams.length} exames</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  {criticalCount > 0 && (
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-risk-high/10 text-risk-high">{criticalCount} crítico{criticalCount > 1 ? "s" : ""}</span>
+                  )}
+                  {alteredCount > 0 && (
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-risk-medium/10 text-risk-medium">{alteredCount} alterado{alteredCount > 1 ? "s" : ""}</span>
+                  )}
+                </div>
+              </button>
+
+              {isOpen && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-t border-b bg-secondary/50">
+                        <th className="text-left px-4 py-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Exame</th>
+                        <th className="text-left px-4 py-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Resultado</th>
+                        <th className="text-left px-4 py-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Referência</th>
+                        <th className="text-left px-4 py-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {dateExams.map((ex, i) => (
+                        <motion.tr
+                          key={ex.id}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: i * 0.03 }}
+                          className={ex.status === "critical" ? "bg-risk-high/5" : ex.status === "altered" ? "bg-risk-medium/5" : ""}
+                        >
+                          <td className="px-4 py-2.5 text-sm font-medium text-foreground">{ex.name}</td>
+                          <td className="px-4 py-2.5 font-mono text-sm font-semibold tracking-tight">
+                            {ex.value} <span className="text-xs text-muted-foreground font-normal">{ex.unit}</span>
+                          </td>
+                          <td className="px-4 py-2.5 text-xs text-muted-foreground">{ex.reference}</td>
+                          <td className="px-4 py-2.5">
+                            <ExamStatus status={ex.status} />
+                          </td>
+                        </motion.tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </motion.div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
