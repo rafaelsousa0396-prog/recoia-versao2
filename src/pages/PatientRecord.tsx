@@ -49,10 +49,11 @@ export default function PatientRecord() {
         <div className="flex-1">
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-semibold text-foreground">{patient.name}</h1>
+            <span className="text-xs text-muted-foreground font-normal">Leito {patient.bed} · {patient.sector}</span>
             <span className={riskClasses[patient.risk]}>{riskLabels[patient.risk]}</span>
-        </div>
+          </div>
           <p className="text-xs text-muted-foreground">
-            {patient.age} anos · {patient.gender === "M" ? "Masculino" : "Feminino"} · Leito {patient.bed} · {patient.sector} · {patient.diagnosis} · Nasc. {format(parseISO(patient.birthDate), "dd/MM/yyyy")} · Internação {format(parseISO(patient.admissionDate), "dd/MM/yyyy")} ({stayDays} {stayDays === 1 ? "dia" : "dias"}) · Mãe: {patient.motherName}
+            {patient.age} anos · Nasc. {format(parseISO(patient.birthDate), "dd/MM/yyyy")} · {patient.gender === "M" ? "Masculino" : "Feminino"} · Mãe: {patient.motherName} · Internação {format(parseISO(patient.admissionDate), "dd/MM/yyyy")} ({stayDays} {stayDays === 1 ? "dia" : "dias"}) · {patient.diagnosis}
           </p>
         </div>
         <div className="text-right">
