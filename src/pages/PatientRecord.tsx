@@ -1,18 +1,24 @@
+import React, { useState } from "react";
 import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
-import { ArrowLeft, Heart, Droplets, Thermometer, Activity, Brain, FileText, ClipboardList, Pill, Clock, AlertTriangle, CheckCircle2 as Check2, Calendar, User } from "lucide-react";
+import { ArrowLeft, Heart, Droplets, Thermometer, Activity, Brain, FileText, ClipboardList, Pill, Clock, AlertTriangle, CheckCircle2 as Check2, Calendar, User, ChevronDown } from "lucide-react";
 import { differenceInDays, format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { motion } from "framer-motion";
+import { DayPicker } from "react-day-picker";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { patients, evolutions, exams, prescriptions } from "@/data/mockData";
 import { SparkLine } from "@/components/SparkLine";
 
 const tabs = [
-{ label: "Resumo", path: "", icon: ClipboardList },
-{ label: "Evolução IA", path: "/evolucao", icon: Brain },
-{ label: "Prescrições", path: "/prescricoes", icon: Pill },
-{ label: "Exames", path: "/exames", icon: FileText },
-{ label: "Sinais Vitais", path: "/vitais", icon: Activity }];
-
+  { label: "Resumo", path: "", icon: ClipboardList },
+  { label: "Evolução IA", path: "/evolucao", icon: Brain },
+  { label: "Prescrições", path: "/prescricoes", icon: Pill },
+  { label: "Exames", path: "/exames", icon: FileText },
+  { label: "Sinais Vitais", path: "/vitais", icon: Activity },
+];
 
 export default function PatientRecord() {
   const { id, "*": subPath } = useParams();
@@ -24,8 +30,8 @@ export default function PatientRecord() {
       <div className="p-6 text-center text-muted-foreground">
         <p>Paciente não encontrado.</p>
         <button onClick={() => navigate("/")} className="text-primary text-sm mt-2 underline">Voltar</button>
-      </div>);
-
+      </div>
+    );
   }
 
   const currentTab = subPath || "";
@@ -69,15 +75,15 @@ export default function PatientRecord() {
               key={tab.path}
               to={`/paciente/${id}${tab.path}`}
               className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium transition-colors border-b-2 -mb-px ${
-              isActive ?
-              "border-primary text-primary" :
-              "border-transparent text-muted-foreground hover:text-foreground hover:border-border"}`
-              }>
-              
+                isActive
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
+              }`}
+            >
               <tab.icon className="w-3.5 h-3.5" />
               {tab.label}
-            </Link>);
-
+            </Link>
+          );
         })}
       </div>
 
@@ -87,12 +93,12 @@ export default function PatientRecord() {
       {currentTab === "prescricoes" && <PrescriptionsTab patientId={patient.id} />}
       {currentTab === "exames" && <ExamsTab />}
       {currentTab === "vitais" && <VitalsTab patient={patient} />}
-    </div>);
-
+    </div>
+  );
 }
 
 /* ============ SUMMARY TAB ============ */
-function SummaryTab({ patient }: {patient: typeof patients[0];}) {
+function SummaryTab({ patient }: { patient: typeof patients[0] }) {
   return (
     <div className="space-y-6">
       {/* Vitals Strip */}
@@ -104,24 +110,24 @@ function SummaryTab({ patient }: {patient: typeof patients[0];}) {
       </motion.div>
 
       {/* Alerts */}
-      {patient.alerts.length > 0 &&
-      <div className="bg-risk-high/5 border border-risk-high/20 rounded-xl p-4">
+      {patient.alerts.length > 0 && (
+        <div className="bg-risk-high/5 border border-risk-high/20 rounded-xl p-4">
           <h3 className="text-xs font-semibold text-risk-high uppercase tracking-wider mb-2">Alertas Ativos</h3>
           <ul className="space-y-1">
-            {patient.alerts.map((a, i) =>
-          <li key={i} className="text-sm text-foreground">• {a}</li>
-          )}
+            {patient.alerts.map((a, i) => (
+              <li key={i} className="text-sm text-foreground">• {a}</li>
+            ))}
           </ul>
         </div>
-      }
+      )}
 
       {/* Split View */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div>
           <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Evoluções</h2>
           <div className="space-y-3">
-            {evolutions.map((evo) =>
-            <motion.div key={evo.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-card border rounded-xl p-4 clinical-shadow">
+            {evolutions.map((evo) => (
+              <motion.div key={evo.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-card border rounded-xl p-4 clinical-shadow">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-semibold text-foreground">{evo.professional}</span>
@@ -131,7 +137,7 @@ function SummaryTab({ patient }: {patient: typeof patients[0];}) {
                 </div>
                 <p className="text-sm text-foreground/90 leading-relaxed">{evo.content}</p>
               </motion.div>
-            )}
+            ))}
           </div>
         </div>
 
@@ -148,8 +154,8 @@ function SummaryTab({ patient }: {patient: typeof patients[0];}) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {exams.map((ex) =>
-                <tr key={ex.id} className={ex.status === "critical" ? "bg-risk-high/5" : ex.status === "altered" ? "bg-risk-medium/5" : ""}>
+                {exams.map((ex) => (
+                  <tr key={ex.id} className={ex.status === "critical" ? "bg-risk-high/5" : ex.status === "altered" ? "bg-risk-medium/5" : ""}>
                     <td className="px-4 py-2 text-sm text-foreground">{ex.name}</td>
                     <td className="px-4 py-2 font-mono text-sm font-medium tracking-tight">
                       {ex.value} <span className="text-xs text-muted-foreground">{ex.unit}</span>
@@ -157,21 +163,19 @@ function SummaryTab({ patient }: {patient: typeof patients[0];}) {
                     <td className="px-4 py-2 text-xs text-muted-foreground">{ex.reference}</td>
                     <td className="px-4 py-2"><ExamStatus status={ex.status} /></td>
                   </tr>
-                )}
+                ))}
               </tbody>
             </table>
           </div>
         </div>
       </div>
-    </div>);
-
+    </div>
+  );
 }
 
 /* ============ EVOLUTION TAB ============ */
-import { useState } from "react";
 import { Sparkles, Mic, CheckCircle2 } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui/button";
 
 const roles = ["Médico", "Enfermagem", "Fisioterapia", "Assistente Social", "Psicologia", "Fonoaudiologia", "Farmácia"];
 
@@ -191,7 +195,7 @@ const aiSuggestion = `Paciente no 3º dia de internação em UTI, mantendo quadr
 4. Manter balanço hídrico neutro — avaliar furosemida se necessário
 5. Solicitar novo hemograma + PCR + procalcitonina em 12h`;
 
-function EvolutionTab({ patient }: {patient: typeof patients[0];}) {
+function EvolutionTab({ patient }: { patient: typeof patients[0] }) {
   const [selectedRole, setSelectedRole] = useState(roles[0]);
   const [inputText, setInputText] = useState("");
   const [generatedText, setGeneratedText] = useState("");
@@ -238,11 +242,11 @@ function EvolutionTab({ patient }: {patient: typeof patients[0];}) {
           Leito {patient.bed} ({patient.sector}). Diagnóstico: {patient.diagnosis}.
           Risco: {patient.risk === "high" ? "Alto" : patient.risk === "medium" ? "Moderado" : "Estável"}.
         </p>
-        {patient.alerts.length > 0 &&
-        <div className="mt-2 text-xs text-risk-high">
+        {patient.alerts.length > 0 && (
+          <div className="mt-2 text-xs text-risk-high">
             {patient.alerts.map((a, i) => <p key={i}>⚠ {a}</p>)}
           </div>
-        }
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -258,8 +262,8 @@ function EvolutionTab({ patient }: {patient: typeof patients[0];}) {
             onChange={(e) => setInputText(e.target.value)}
             placeholder="paciente afebril, dreno produtivo 50ml, diurese satisfatória, mantendo conduta..."
             className="clinical-input !border !border-border rounded-xl !px-4 !py-3 min-h-[200px] resize-none"
-            rows={10} />
-          
+            rows={10}
+          />
           <div className="mt-3">
             <Button onClick={handleGenerate} disabled={isGenerating} className="bg-primary text-primary-foreground hover:bg-primary/90">
               <Sparkles className="w-4 h-4 mr-1.5" />
@@ -271,46 +275,58 @@ function EvolutionTab({ patient }: {patient: typeof patients[0];}) {
         <div>
           <div className="flex items-center justify-between mb-2">
             <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Evolução Gerada</label>
-            {generatedText && !isGenerating &&
-            <button className="flex items-center gap-1 text-xs text-status-stable hover:text-status-stable/80 transition-colors">
+            {generatedText && !isGenerating && (
+              <button className="flex items-center gap-1 text-xs text-status-stable hover:text-status-stable/80 transition-colors">
                 <CheckCircle2 className="w-3.5 h-3.5" /> Assinar e Salvar
               </button>
-            }
+            )}
           </div>
           <div className="bg-card border rounded-xl p-4 min-h-[200px] clinical-shadow">
             <AnimatePresence>
-              {generatedText ?
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-sm leading-relaxed text-foreground/90 whitespace-pre-wrap">
+              {generatedText ? (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-sm leading-relaxed text-foreground/90 whitespace-pre-wrap">
                   {generatedText}
                   {isGenerating && <span className="inline-block w-0.5 h-4 bg-primary ml-0.5 animate-pulse-clinical" />}
-                </motion.div> :
-
-              <p className="text-sm text-muted-foreground/50 italic">
+                </motion.div>
+              ) : (
+                <p className="text-sm text-muted-foreground/50 italic">
                   A evolução gerada pela IA aparecerá aqui. Insira tópicos à esquerda e clique em "Gerar".
                 </p>
-              }
+              )}
             </AnimatePresence>
           </div>
         </div>
       </div>
-    </div>);
-
+    </div>
+  );
 }
 
 /* ============ PRESCRIPTIONS TAB ============ */
-function PrescriptionsTab({ patientId }: {patientId: string;}) {
+function PrescriptionsTab({ patientId }: { patientId: string }) {
   const [filter, setFilter] = useState<"all" | "active" | "completed">("active");
+  const [dateFilter, setDateFilter] = React.useState<Date | undefined>(undefined);
+  const [doctorFilter, setDoctorFilter] = React.useState<string>("all");
+
   const patientPrescriptions = prescriptions.filter((p) => p.patientId === patientId);
-  const filtered = patientPrescriptions.filter((p) =>
-  filter === "all" ? true : filter === "active" ? p.status === "active" : p.status === "completed" || p.status === "suspended"
-  );
+
+  const prescribers = [...new Set(patientPrescriptions.map((p) => p.prescribedBy))];
+
+  const filtered = patientPrescriptions.filter((p) => {
+    const statusMatch = filter === "all" ? true : filter === "active" ? p.status === "active" : p.status === "completed" || p.status === "suspended";
+    const dateMatch = dateFilter ? p.startDate === format(dateFilter, "yyyy-MM-dd") : true;
+    const doctorMatch = doctorFilter === "all" ? true : p.prescribedBy === doctorFilter;
+    return statusMatch && dateMatch && doctorMatch;
+  });
+
+  const allRxDates = [...new Set(filtered.map((r) => r.startDate))].sort((a, b) => b.localeCompare(a));
+  const [openRxDates, setOpenRxDates] = React.useState<string[]>(() => allRxDates.length > 0 ? [allRxDates[0]] : []);
 
   const categoryColors: Record<string, string> = {
     antibiotic: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20",
     analgesic: "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20",
     cardiovascular: "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20",
     fluid: "bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border-cyan-500/20",
-    other: "bg-secondary text-muted-foreground border-border"
+    other: "bg-secondary text-muted-foreground border-border",
   };
 
   const categoryLabels: Record<string, string> = {
@@ -318,13 +334,13 @@ function PrescriptionsTab({ patientId }: {patientId: string;}) {
     analgesic: "Analgésico",
     cardiovascular: "Cardiovascular",
     fluid: "Hidratação",
-    other: "Outros"
+    other: "Outros",
   };
 
   const statusConfig = {
     active: { label: "Ativo", cls: "risk-badge-stable" },
     suspended: { label: "Suspenso", cls: "risk-badge-medium" },
-    completed: { label: "Concluído", cls: "bg-secondary text-muted-foreground text-[10px] px-2 py-0.5 rounded-full font-medium" }
+    completed: { label: "Concluído", cls: "bg-secondary text-muted-foreground text-[10px] px-2 py-0.5 rounded-full font-medium" },
   };
 
   const now = new Date();
@@ -341,118 +357,223 @@ function PrescriptionsTab({ patientId }: {patientId: string;}) {
           </div>
         </div>
         <div className="flex gap-1 bg-secondary rounded-lg p-0.5">
-          {(["active", "all", "completed"] as const).map((f) =>
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-3 py-1 text-xs rounded-md transition-colors ${
-            filter === f ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`
-            }>
-            
+          {(["active", "all", "completed"] as const).map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                filter === f ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
               {f === "active" ? "Ativos" : f === "all" ? "Todos" : "Concluídos"}
             </button>
-          )}
+          ))}
         </div>
       </div>
 
+      {/* Date & Doctor Filters */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className={cn("h-8 text-xs gap-2", dateFilter && "border-primary text-primary")}>
+              <Calendar className="w-3.5 h-3.5" />
+              {dateFilter ? format(dateFilter, "dd/MM/yyyy") : "Filtrar por data"}
+              {dateFilter && (
+                <span
+                  role="button"
+                  className="ml-1 hover:text-destructive"
+                  onClick={(e) => { e.stopPropagation(); setDateFilter(undefined); }}
+                >
+                  ×
+                </span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <DayPicker
+              mode="single"
+              selected={dateFilter}
+              onSelect={setDateFilter}
+              initialFocus
+              className={cn("p-3 pointer-events-auto")}
+            />
+          </PopoverContent>
+        </Popover>
+
+        <Select value={doctorFilter} onValueChange={setDoctorFilter}>
+          <SelectTrigger className={cn("h-8 w-auto min-w-[180px] text-xs", doctorFilter !== "all" && "border-primary text-primary")}>
+            <User className="w-3.5 h-3.5 mr-1.5" />
+            <SelectValue placeholder="Profissional" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os profissionais</SelectItem>
+            {prescribers.map((doc) => (
+              <SelectItem key={doc} value={doc}>{doc}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       {/* Schedule Timeline */}
-      {filter !== "completed" &&
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card border rounded-xl p-4 clinical-shadow">
-          
-
-
-        
+      {filter !== "completed" && (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card border rounded-xl p-4 clinical-shadow">
+          <div className="flex items-center gap-2 mb-3">
+            <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Aprazamento — Próximos Horários</span>
+          </div>
           <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
             {["06:00", "08:00", "12:00", "14:00", "16:00", "18:00", "20:00", "22:00"].map((time) => {
-            const medsAtTime = filtered.filter((p) => p.status === "active" && p.schedule.includes(time));
-            const isPast = time < currentHour;
-            return (
-              <div key={time} className={`rounded-lg border p-2 text-center ${isPast ? "opacity-50" : ""} ${medsAtTime.length > 0 ? "border-primary/30 bg-primary/5" : "border-border"}`}>
+              const medsAtTime = filtered.filter((p) => p.status === "active" && p.schedule.includes(time));
+              const isPast = time < currentHour;
+              return (
+                <div key={time} className={`rounded-lg border p-2 text-center ${isPast ? "opacity-50" : ""} ${medsAtTime.length > 0 ? "border-primary/30 bg-primary/5" : "border-border"}`}>
                   <p className="text-[10px] font-mono font-semibold text-muted-foreground">{time}</p>
-                  {medsAtTime.length > 0 ?
-                <div className="mt-1 space-y-0.5">
-                      {medsAtTime.map((m) =>
-                  <p key={m.id} className="text-[10px] text-foreground truncate" title={`${m.medication} ${m.dose}`}>
+                  {medsAtTime.length > 0 ? (
+                    <div className="mt-1 space-y-0.5">
+                      {medsAtTime.map((m) => (
+                        <p key={m.id} className="text-[10px] text-foreground truncate" title={`${m.medication} ${m.dose}`}>
                           {m.medication.split(" ")[0]}
                         </p>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-[10px] text-muted-foreground/40 mt-1">—</p>
                   )}
-                    </div> :
-
-                <p className="text-[10px] text-muted-foreground/40 mt-1">—</p>
-                }
-                </div>);
-
-          })}
+                </div>
+              );
+            })}
           </div>
         </motion.div>
-      }
+      )}
 
-      {/* Medication List */}
-      <div className="space-y-3">
-        {filtered.length === 0 ?
-        <div className="text-center py-10 text-muted-foreground text-sm">Nenhuma prescrição encontrada.</div> :
+      {/* Medication List grouped by date */}
+      {(() => {
+        const groupedByDate = filtered.reduce<Record<string, typeof filtered>>((acc, rx) => {
+          const key = rx.startDate;
+          if (!acc[key]) acc[key] = [];
+          acc[key].push(rx);
+          return acc;
+        }, {});
+        const sortedDates = Object.keys(groupedByDate).sort((a, b) => b.localeCompare(a));
 
-        filtered.map((rx, i) =>
-        <motion.div
-          key={rx.id}
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: i * 0.04 }}
-          className={`bg-card border rounded-xl p-4 clinical-shadow ${rx.status === "completed" ? "opacity-60" : ""}`}>
-          
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-sm font-semibold text-foreground">{rx.medication}</h3>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${categoryColors[rx.category]}`}>
-                      {categoryLabels[rx.category]}
-                    </span>
-                    <span className={statusConfig[rx.status].cls}>{statusConfig[rx.status].label}</span>
+        return (
+          <div className="space-y-3">
+            {filtered.length === 0 ? (
+              <div className="text-center py-10 text-muted-foreground text-sm">Nenhuma prescrição encontrada.</div>
+            ) : (
+              sortedDates.map((date) => {
+                const dateRxs = groupedByDate[date];
+                const formattedDate = format(parseISO(date), "dd/MM/yyyy");
+                const isOpen = openRxDates.includes(date);
+
+                return (
+                  <div key={date} className="bg-card border rounded-xl clinical-shadow overflow-hidden">
+                    <button
+                      onClick={() => setOpenRxDates((prev) => prev.includes(date) ? prev.filter((d) => d !== date) : [...prev, date])}
+                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-secondary/30 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${isOpen ? "rotate-0" : "-rotate-90"}`} />
+                        <span className="text-sm font-semibold text-foreground">{formattedDate}</span>
+                        <span className="text-xs text-muted-foreground">{dateRxs.length} {dateRxs.length === 1 ? "prescrição" : "prescrições"}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {dateRxs.filter((r) => r.status === "active").length > 0 && (
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600">{dateRxs.filter((r) => r.status === "active").length} ativa{dateRxs.filter((r) => r.status === "active").length > 1 ? "s" : ""}</span>
+                        )}
+                      </div>
+                    </button>
+
+                    {isOpen && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.2 }}
+                        className="border-t px-4 py-3 space-y-3"
+                      >
+                        {dateRxs.map((rx, i) => (
+                          <motion.div
+                            key={rx.id}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: i * 0.04 }}
+                            className={`bg-secondary/20 border rounded-lg p-4 ${rx.status === "completed" ? "opacity-60" : ""}`}
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <h3 className="text-sm font-semibold text-foreground">{rx.medication}</h3>
+                                  <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${categoryColors[rx.category]}`}>
+                                    {categoryLabels[rx.category]}
+                                  </span>
+                                  <span className={statusConfig[rx.status].cls}>{statusConfig[rx.status].label}</span>
+                                </div>
+                                <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-1">
+                                  <div>
+                                    <span className="text-[10px] text-muted-foreground uppercase">Dose</span>
+                                    <p className="text-sm font-mono font-medium text-foreground">{rx.dose}</p>
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-muted-foreground uppercase">Via</span>
+                                    <p className="text-sm text-foreground">{rx.route}</p>
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-muted-foreground uppercase">Frequência</span>
+                                    <p className="text-sm text-foreground">{rx.frequency}</p>
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-muted-foreground uppercase">Horários</span>
+                                    <p className="text-sm font-mono text-foreground">
+                                      {rx.schedule.length > 0 ? rx.schedule.join(" · ") : "Contínuo"}
+                                    </p>
+                                  </div>
+                                </div>
+                                {rx.notes && (
+                                  <div className="mt-2 flex items-start gap-1.5">
+                                    <AlertTriangle className="w-3 h-3 text-muted-foreground mt-0.5 flex-shrink-0" />
+                                    <p className="text-xs text-muted-foreground italic">{rx.notes}</p>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="text-right flex-shrink-0">
+                                <p className="text-[10px] text-muted-foreground">{rx.prescribedBy}</p>
+                                <p className="text-[10px] text-muted-foreground">
+                                  {rx.startDate}{rx.endDate ? ` → ${rx.endDate}` : ""}
+                                </p>
+                              </div>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </motion.div>
+                    )}
                   </div>
-                  <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-1">
-                    <div>
-                      <span className="text-[10px] text-muted-foreground uppercase">Dose</span>
-                      <p className="text-sm font-mono font-medium text-foreground">{rx.dose}</p>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-muted-foreground uppercase">Via</span>
-                      <p className="text-sm text-foreground">{rx.route}</p>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-muted-foreground uppercase">Frequência</span>
-                      <p className="text-sm text-foreground">{rx.frequency}</p>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-muted-foreground uppercase">Horários</span>
-                      <p className="text-sm font-mono text-foreground">
-                        {rx.schedule.length > 0 ? rx.schedule.join(" · ") : "Contínuo"}
-                      </p>
-                    </div>
-                  </div>
-                  {rx.notes &&
-              <div className="mt-2 flex items-start gap-1.5">
-                      <AlertTriangle className="w-3 h-3 text-muted-foreground mt-0.5 flex-shrink-0" />
-                      <p className="text-xs text-muted-foreground italic">{rx.notes}</p>
-                    </div>
-              }
-                </div>
-                <div className="text-right flex-shrink-0">
-                  <p className="text-[10px] text-muted-foreground">{rx.prescribedBy}</p>
-                  <p className="text-[10px] text-muted-foreground">
-                    {rx.startDate}{rx.endDate ? ` → ${rx.endDate}` : ""}
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-        )
-        }
-      </div>
-    </div>);
-
+                );
+              })
+            )}
+          </div>
+        );
+      })()}
+    </div>
+  );
 }
 
 /* ============ EXAMS TAB ============ */
 function ExamsTab() {
+  const groupedByDate = exams.reduce<Record<string, typeof exams>>((acc, ex) => {
+    if (!acc[ex.date]) acc[ex.date] = [];
+    acc[ex.date].push(ex);
+    return acc;
+  }, {});
+
+  const sortedDates = Object.keys(groupedByDate).sort((a, b) => b.localeCompare(a));
+  const [openDates, setOpenDates] = React.useState<string[]>(sortedDates.length > 0 ? [sortedDates[0]] : []);
+
+  const toggleDate = (date: string) => {
+    setOpenDates((prev) =>
+      prev.includes(date) ? prev.filter((d) => d !== date) : [...prev, date]
+    );
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
@@ -463,52 +584,89 @@ function ExamsTab() {
         </div>
       </div>
 
-      <div className="bg-card border rounded-xl clinical-shadow overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b bg-secondary/50">
-              <th className="text-left px-4 py-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Exame</th>
-              <th className="text-left px-4 py-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Data</th>
-              <th className="text-left px-4 py-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Resultado</th>
-              <th className="text-left px-4 py-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Referência</th>
-              <th className="text-left px-4 py-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {exams.map((ex, i) =>
-            <motion.tr
-              key={ex.id}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: i * 0.03 }}
-              className={ex.status === "critical" ? "bg-risk-high/5" : ex.status === "altered" ? "bg-risk-medium/5" : ""}>
-              
-                <td className="px-4 py-3 text-sm font-medium text-foreground">{ex.name}</td>
-                <td className="px-4 py-3 text-xs text-muted-foreground">{ex.date}</td>
-                <td className="px-4 py-3 font-mono text-sm font-semibold tracking-tight">
-                  {ex.value} <span className="text-xs text-muted-foreground font-normal">{ex.unit}</span>
-                </td>
-                <td className="px-4 py-3 text-xs text-muted-foreground">{ex.reference}</td>
-                <td className="px-4 py-3">
-                  <ExamStatus status={ex.status} />
-                </td>
-              </motion.tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>);
+      <div className="space-y-3">
+        {sortedDates.map((date) => {
+          const dateExams = groupedByDate[date];
+          const isOpen = openDates.includes(date);
+          const criticalCount = dateExams.filter((e) => e.status === "critical").length;
+          const alteredCount = dateExams.filter((e) => e.status === "altered").length;
+          const formattedDate = format(parseISO(date), "dd/MM/yyyy");
 
+          return (
+            <div key={date} className="bg-card border rounded-xl clinical-shadow overflow-hidden">
+              <button
+                onClick={() => toggleDate(date)}
+                className="w-full flex items-center justify-between px-4 py-3 hover:bg-secondary/30 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${isOpen ? "rotate-0" : "-rotate-90"}`} />
+                  <span className="text-sm font-semibold text-foreground">{formattedDate}</span>
+                  <span className="text-xs text-muted-foreground">{dateExams.length} exames</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  {criticalCount > 0 && (
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-risk-high/10 text-risk-high">{criticalCount} crítico{criticalCount > 1 ? "s" : ""}</span>
+                  )}
+                  {alteredCount > 0 && (
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-risk-medium/10 text-risk-medium">{alteredCount} alterado{alteredCount > 1 ? "s" : ""}</span>
+                  )}
+                </div>
+              </button>
+
+              {isOpen && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-t border-b bg-secondary/50">
+                        <th className="text-left px-4 py-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Exame</th>
+                        <th className="text-left px-4 py-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Resultado</th>
+                        <th className="text-left px-4 py-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Referência</th>
+                        <th className="text-left px-4 py-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {dateExams.map((ex, i) => (
+                        <motion.tr
+                          key={ex.id}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: i * 0.03 }}
+                          className={ex.status === "critical" ? "bg-risk-high/5" : ex.status === "altered" ? "bg-risk-medium/5" : ""}
+                        >
+                          <td className="px-4 py-2.5 text-sm font-medium text-foreground">{ex.name}</td>
+                          <td className="px-4 py-2.5 font-mono text-sm font-semibold tracking-tight">
+                            {ex.value} <span className="text-xs text-muted-foreground font-normal">{ex.unit}</span>
+                          </td>
+                          <td className="px-4 py-2.5 text-xs text-muted-foreground">{ex.reference}</td>
+                          <td className="px-4 py-2.5">
+                            <ExamStatus status={ex.status} />
+                          </td>
+                        </motion.tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </motion.div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 /* ============ VITALS TAB ============ */
-function VitalsTab({ patient }: {patient: typeof patients[0];}) {
+function VitalsTab({ patient }: { patient: typeof patients[0] }) {
   const vitalsData = [
-  { icon: Heart, label: "Frequência Cardíaca", value: patient.vitals.fc[patient.vitals.fc.length - 1], unit: "bpm", data: patient.vitals.fc, danger: patient.vitals.fc[patient.vitals.fc.length - 1] > 100 },
-  { icon: Droplets, label: "Saturação O₂", value: patient.vitals.satO2[patient.vitals.satO2.length - 1], unit: "%", data: patient.vitals.satO2, danger: patient.vitals.satO2[patient.vitals.satO2.length - 1] < 92 },
-  { icon: Activity, label: "Pressão Arterial", value: patient.vitals.pa, unit: "mmHg", data: undefined, danger: false },
-  { icon: Thermometer, label: "Temperatura", value: patient.vitals.temp, unit: "°C", data: undefined, danger: patient.vitals.temp > 37.5 }];
-
+    { icon: Heart, label: "Frequência Cardíaca", value: patient.vitals.fc[patient.vitals.fc.length - 1], unit: "bpm", data: patient.vitals.fc, danger: patient.vitals.fc[patient.vitals.fc.length - 1] > 100 },
+    { icon: Droplets, label: "Saturação O₂", value: patient.vitals.satO2[patient.vitals.satO2.length - 1], unit: "%", data: patient.vitals.satO2, danger: patient.vitals.satO2[patient.vitals.satO2.length - 1] < 92 },
+    { icon: Activity, label: "Pressão Arterial", value: patient.vitals.pa, unit: "mmHg", data: undefined, danger: false },
+    { icon: Thermometer, label: "Temperatura", value: patient.vitals.temp, unit: "°C", data: undefined, danger: patient.vitals.temp > 37.5 },
+  ];
 
   return (
     <div className="space-y-4">
@@ -521,14 +679,14 @@ function VitalsTab({ patient }: {patient: typeof patients[0];}) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {vitalsData.map((v, i) =>
-        <motion.div
-          key={v.label}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.05 }}
-          className={`bg-card border rounded-xl p-5 clinical-shadow ${v.danger ? "border-risk-high/30" : ""}`}>
-          
+        {vitalsData.map((v, i) => (
+          <motion.div
+            key={v.label}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.05 }}
+            className={`bg-card border rounded-xl p-5 clinical-shadow ${v.danger ? "border-risk-high/30" : ""}`}
+          >
             <div className="flex items-center gap-2 mb-3">
               <v.icon className={`w-4 h-4 ${v.danger ? "text-risk-high" : "text-muted-foreground"}`} />
               <span className="text-xs text-muted-foreground uppercase tracking-wider">{v.label}</span>
@@ -539,27 +697,27 @@ function VitalsTab({ patient }: {patient: typeof patients[0];}) {
               </p>
               {v.data && <SparkLine data={v.data} color={v.danger ? "hsl(0, 72%, 51%)" : "hsl(200, 80%, 45%)"} width={120} height={40} />}
             </div>
-            {v.data &&
-          <div className="mt-3 flex gap-2 text-[10px] text-muted-foreground">
-                {v.data.map((val, idx) =>
-            <div key={idx} className="flex flex-col items-center">
+            {v.data && (
+              <div className="mt-3 flex gap-2 text-[10px] text-muted-foreground">
+                {v.data.map((val, idx) => (
+                  <div key={idx} className="flex flex-col items-center">
                     <span className="font-mono">{val}</span>
                     <span>{idx}h</span>
                   </div>
-            )}
+                ))}
               </div>
-          }
+            )}
           </motion.div>
-        )}
+        ))}
       </div>
-    </div>);
-
+    </div>
+  );
 }
 
 /* ============ SHARED COMPONENTS ============ */
-function VitalCard({ icon: Icon, label, value, unit, data, danger
-
-}: {icon: React.ElementType;label: string;value: string;unit: string;data?: number[];danger?: boolean;}) {
+function VitalCard({ icon: Icon, label, value, unit, data, danger }: {
+  icon: React.ElementType; label: string; value: string; unit: string; data?: number[]; danger?: boolean;
+}) {
   return (
     <div className={`bg-card border rounded-xl p-3 clinical-shadow ${danger ? "border-risk-high/30" : ""}`}>
       <div className="flex items-center justify-between">
@@ -572,15 +730,15 @@ function VitalCard({ icon: Icon, label, value, unit, data, danger
       <p className={`vital-value mt-1 ${danger ? "text-risk-high" : "text-foreground"}`}>
         {value} <span className="text-xs text-muted-foreground font-sans">{unit}</span>
       </p>
-    </div>);
-
+    </div>
+  );
 }
 
-function ExamStatus({ status }: {status: "normal" | "altered" | "critical";}) {
+function ExamStatus({ status }: { status: "normal" | "altered" | "critical" }) {
   const config = {
     normal: { label: "Normal", cls: "risk-badge-stable" },
     altered: { label: "Alterado", cls: "risk-badge-medium" },
-    critical: { label: "Crítico", cls: "risk-badge-high" }
+    critical: { label: "Crítico", cls: "risk-badge-high" },
   };
   const c = config[status];
   return <span className={c.cls}>{c.label}</span>;
