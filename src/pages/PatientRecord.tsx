@@ -301,10 +301,20 @@ function EvolutionTab({ patient }: { patient: typeof patients[0] }) {
 /* ============ PRESCRIPTIONS TAB ============ */
 function PrescriptionsTab({ patientId }: { patientId: string }) {
   const [filter, setFilter] = useState<"all" | "active" | "completed">("active");
+  const [dateFilter, setDateFilter] = React.useState<Date | undefined>(undefined);
+  const [doctorFilter, setDoctorFilter] = React.useState<string>("all");
+
   const patientPrescriptions = prescriptions.filter((p) => p.patientId === patientId);
-  const filtered = patientPrescriptions.filter((p) =>
-    filter === "all" ? true : filter === "active" ? p.status === "active" : p.status === "completed" || p.status === "suspended"
-  );
+
+  const prescribers = [...new Set(patientPrescriptions.map((p) => p.prescribedBy))];
+
+  const filtered = patientPrescriptions.filter((p) => {
+    const statusMatch = filter === "all" ? true : filter === "active" ? p.status === "active" : p.status === "completed" || p.status === "suspended";
+    const dateMatch = dateFilter ? p.startDate === format(dateFilter, "yyyy-MM-dd") : true;
+    const doctorMatch = doctorFilter === "all" ? true : p.prescribedBy === doctorFilter;
+    return statusMatch && dateMatch && doctorMatch;
+  });
+
   const allRxDates = [...new Set(filtered.map((r) => r.startDate))].sort((a, b) => b.localeCompare(a));
   const [openRxDates, setOpenRxDates] = React.useState<string[]>(() => allRxDates.length > 0 ? [allRxDates[0]] : []);
 
@@ -356,6 +366,49 @@ function PrescriptionsTab({ patientId }: { patientId: string }) {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Date & Doctor Filters */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className={cn("h-8 text-xs gap-2", dateFilter && "border-primary text-primary")}>
+              <Calendar className="w-3.5 h-3.5" />
+              {dateFilter ? format(dateFilter, "dd/MM/yyyy") : "Filtrar por data"}
+              {dateFilter && (
+                <span
+                  role="button"
+                  className="ml-1 hover:text-destructive"
+                  onClick={(e) => { e.stopPropagation(); setDateFilter(undefined); }}
+                >
+                  ×
+                </span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <DayPicker
+              mode="single"
+              selected={dateFilter}
+              onSelect={setDateFilter}
+              initialFocus
+              className={cn("p-3 pointer-events-auto")}
+            />
+          </PopoverContent>
+        </Popover>
+
+        <Select value={doctorFilter} onValueChange={setDoctorFilter}>
+          <SelectTrigger className={cn("h-8 w-auto min-w-[180px] text-xs", doctorFilter !== "all" && "border-primary text-primary")}>
+            <User className="w-3.5 h-3.5 mr-1.5" />
+            <SelectValue placeholder="Profissional" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os profissionais</SelectItem>
+            {prescribers.map((doc) => (
+              <SelectItem key={doc} value={doc}>{doc}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Schedule Timeline */}
