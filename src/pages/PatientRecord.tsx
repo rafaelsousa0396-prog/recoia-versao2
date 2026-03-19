@@ -301,11 +301,12 @@ function EvolutionTab({ patient }: { patient: typeof patients[0] }) {
 /* ============ PRESCRIPTIONS TAB ============ */
 function PrescriptionsTab({ patientId }: { patientId: string }) {
   const [filter, setFilter] = useState<"all" | "active" | "completed">("active");
-  const [openRxDates, setOpenRxDates] = React.useState<string[]>([]);
   const patientPrescriptions = prescriptions.filter((p) => p.patientId === patientId);
   const filtered = patientPrescriptions.filter((p) =>
     filter === "all" ? true : filter === "active" ? p.status === "active" : p.status === "completed" || p.status === "suspended"
   );
+  const allRxDates = [...new Set(filtered.map((r) => r.startDate))].sort((a, b) => b.localeCompare(a));
+  const [openRxDates, setOpenRxDates] = React.useState<string[]>(() => allRxDates.length > 0 ? [allRxDates[0]] : []);
 
   const categoryColors: Record<string, string> = {
     antibiotic: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20",
