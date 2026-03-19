@@ -388,66 +388,113 @@ function PrescriptionsTab({ patientId }: { patientId: string }) {
         </motion.div>
       )}
 
-      {/* Medication List */}
-      <div className="space-y-3">
-        {filtered.length === 0 ? (
-          <div className="text-center py-10 text-muted-foreground text-sm">Nenhuma prescrição encontrada.</div>
-        ) : (
-          filtered.map((rx, i) => (
-            <motion.div
-              key={rx.id}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.04 }}
-              className={`bg-card border rounded-xl p-4 clinical-shadow ${rx.status === "completed" ? "opacity-60" : ""}`}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-sm font-semibold text-foreground">{rx.medication}</h3>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${categoryColors[rx.category]}`}>
-                      {categoryLabels[rx.category]}
-                    </span>
-                    <span className={statusConfig[rx.status].cls}>{statusConfig[rx.status].label}</span>
+      {/* Medication List grouped by date */}
+      {(() => {
+        const groupedByDate = filtered.reduce<Record<string, typeof filtered>>((acc, rx) => {
+          const key = rx.startDate;
+          if (!acc[key]) acc[key] = [];
+          acc[key].push(rx);
+          return acc;
+        }, {});
+        const sortedDates = Object.keys(groupedByDate).sort((a, b) => b.localeCompare(a));
+
+        return (
+          <div className="space-y-3">
+            {filtered.length === 0 ? (
+              <div className="text-center py-10 text-muted-foreground text-sm">Nenhuma prescrição encontrada.</div>
+            ) : (
+              sortedDates.map((date) => {
+                const dateRxs = groupedByDate[date];
+                const formattedDate = format(parseISO(date), "dd/MM/yyyy");
+                const isOpen = openRxDates.includes(date);
+
+                return (
+                  <div key={date} className="bg-card border rounded-xl clinical-shadow overflow-hidden">
+                    <button
+                      onClick={() => setOpenRxDates((prev) => prev.includes(date) ? prev.filter((d) => d !== date) : [...prev, date])}
+                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-secondary/30 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${isOpen ? "rotate-0" : "-rotate-90"}`} />
+                        <span className="text-sm font-semibold text-foreground">{formattedDate}</span>
+                        <span className="text-xs text-muted-foreground">{dateRxs.length} {dateRxs.length === 1 ? "prescrição" : "prescrições"}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {dateRxs.filter((r) => r.status === "active").length > 0 && (
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600">{dateRxs.filter((r) => r.status === "active").length} ativa{dateRxs.filter((r) => r.status === "active").length > 1 ? "s" : ""}</span>
+                        )}
+                      </div>
+                    </button>
+
+                    {isOpen && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.2 }}
+                        className="border-t px-4 py-3 space-y-3"
+                      >
+                        {dateRxs.map((rx, i) => (
+                          <motion.div
+                            key={rx.id}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: i * 0.04 }}
+                            className={`bg-secondary/20 border rounded-lg p-4 ${rx.status === "completed" ? "opacity-60" : ""}`}
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <h3 className="text-sm font-semibold text-foreground">{rx.medication}</h3>
+                                  <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${categoryColors[rx.category]}`}>
+                                    {categoryLabels[rx.category]}
+                                  </span>
+                                  <span className={statusConfig[rx.status].cls}>{statusConfig[rx.status].label}</span>
+                                </div>
+                                <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-1">
+                                  <div>
+                                    <span className="text-[10px] text-muted-foreground uppercase">Dose</span>
+                                    <p className="text-sm font-mono font-medium text-foreground">{rx.dose}</p>
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-muted-foreground uppercase">Via</span>
+                                    <p className="text-sm text-foreground">{rx.route}</p>
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-muted-foreground uppercase">Frequência</span>
+                                    <p className="text-sm text-foreground">{rx.frequency}</p>
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-muted-foreground uppercase">Horários</span>
+                                    <p className="text-sm font-mono text-foreground">
+                                      {rx.schedule.length > 0 ? rx.schedule.join(" · ") : "Contínuo"}
+                                    </p>
+                                  </div>
+                                </div>
+                                {rx.notes && (
+                                  <div className="mt-2 flex items-start gap-1.5">
+                                    <AlertTriangle className="w-3 h-3 text-muted-foreground mt-0.5 flex-shrink-0" />
+                                    <p className="text-xs text-muted-foreground italic">{rx.notes}</p>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="text-right flex-shrink-0">
+                                <p className="text-[10px] text-muted-foreground">{rx.prescribedBy}</p>
+                                <p className="text-[10px] text-muted-foreground">
+                                  {rx.startDate}{rx.endDate ? ` → ${rx.endDate}` : ""}
+                                </p>
+                              </div>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </motion.div>
+                    )}
                   </div>
-                  <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-1">
-                    <div>
-                      <span className="text-[10px] text-muted-foreground uppercase">Dose</span>
-                      <p className="text-sm font-mono font-medium text-foreground">{rx.dose}</p>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-muted-foreground uppercase">Via</span>
-                      <p className="text-sm text-foreground">{rx.route}</p>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-muted-foreground uppercase">Frequência</span>
-                      <p className="text-sm text-foreground">{rx.frequency}</p>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-muted-foreground uppercase">Horários</span>
-                      <p className="text-sm font-mono text-foreground">
-                        {rx.schedule.length > 0 ? rx.schedule.join(" · ") : "Contínuo"}
-                      </p>
-                    </div>
-                  </div>
-                  {rx.notes && (
-                    <div className="mt-2 flex items-start gap-1.5">
-                      <AlertTriangle className="w-3 h-3 text-muted-foreground mt-0.5 flex-shrink-0" />
-                      <p className="text-xs text-muted-foreground italic">{rx.notes}</p>
-                    </div>
-                  )}
-                </div>
-                <div className="text-right flex-shrink-0">
-                  <p className="text-[10px] text-muted-foreground">{rx.prescribedBy}</p>
-                  <p className="text-[10px] text-muted-foreground">
-                    {rx.startDate}{rx.endDate ? ` → ${rx.endDate}` : ""}
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          ))
-        )}
-      </div>
+                );
+              })
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 }
