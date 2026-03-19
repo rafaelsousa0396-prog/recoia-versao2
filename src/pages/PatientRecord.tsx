@@ -225,14 +225,6 @@ function EvolutionTab({ patient }: { patient: typeof patients[0] }) {
         </div>
       </div>
 
-      <div className="flex gap-3 flex-wrap">
-        <div>
-          <label className="text-[10px] text-muted-foreground uppercase tracking-wider block mb-1">Profissional</label>
-          <select value={selectedRole} onChange={(e) => setSelectedRole(e.target.value)} className="clinical-input !w-auto !py-1.5 text-sm">
-            {roles.map((r) => <option key={r}>{r}</option>)}
-          </select>
-        </div>
-      </div>
 
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
