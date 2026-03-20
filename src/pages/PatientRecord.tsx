@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { patients, evolutions, exams, prescriptions } from "@/data/mockData";
-import { SparkLine } from "@/components/SparkLine";
+
 
 const tabs = [
   { label: "Resumo", path: "", icon: ClipboardList },
