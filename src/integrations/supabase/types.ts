@@ -14,16 +14,145 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      hospitals: {
+        Row: {
+          ativo: boolean
+          cidade: string
+          created_at: string
+          estado: string
+          id: string
+          nome: string
+        }
+        Insert: {
+          ativo?: boolean
+          cidade: string
+          created_at?: string
+          estado: string
+          id?: string
+          nome: string
+        }
+        Update: {
+          ativo?: boolean
+          cidade?: string
+          created_at?: string
+          estado?: string
+          id?: string
+          nome?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          nome: string
+          registro: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id: string
+          nome: string
+          registro: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          nome?: string
+          registro?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_hospitals: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          hospital_id: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          hospital_id: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          hospital_id?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_hospitals_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_hospitals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_hospitals: {
+        Args: { _user_id: string }
+        Returns: {
+          ativo: boolean
+          created_at: string
+          hospital_id: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "user_hospitals"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      has_hospital_access: {
+        Args: { _hospital_id: string; _user_id: string }
+        Returns: boolean
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role:
+        | "admin"
+        | "medico"
+        | "enfermagem"
+        | "fisio"
+        | "assistente_social"
+        | "recepcao"
+        | "farmacia"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +279,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: [
+        "admin",
+        "medico",
+        "enfermagem",
+        "fisio",
+        "assistente_social",
+        "recepcao",
+        "farmacia",
+      ],
+    },
   },
 } as const
