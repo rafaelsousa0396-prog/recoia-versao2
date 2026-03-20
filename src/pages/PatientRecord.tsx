@@ -777,8 +777,14 @@ function VitalsTab({ patient }: { patient: typeof patients[0] }) {
 
 /* ============ SHARED COMPONENTS ============ */
 function VitalCard({ icon: Icon, label, value, unit, data, danger }: {
-  icon: React.ElementType; label: string; value: string; unit: string; data?: number[]; danger?: boolean;
+  icon: React.ElementType; label: string; value: string; unit: string; data?: (number | string)[]; danger?: boolean;
 }) {
+  const minMax = data && data.length > 0
+    ? typeof data[0] === "number"
+      ? `${Math.min(...(data as number[]))}–${Math.max(...(data as number[]))}`
+      : `${data[0]}…${data[data.length - 1]}`
+    : null;
+
   return (
     <div className={`bg-card border rounded-xl p-3 clinical-shadow ${danger ? "border-risk-high/30" : ""}`}>
       <div className="flex items-center justify-between">
@@ -786,9 +792,9 @@ function VitalCard({ icon: Icon, label, value, unit, data, danger }: {
           <Icon className={`w-3.5 h-3.5 ${danger ? "text-risk-high" : "text-muted-foreground"}`} />
           <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</span>
         </div>
-        {data && (
+        {minMax && (
           <span className={`text-[10px] font-mono ${danger ? "text-risk-high" : "text-muted-foreground"}`}>
-            {Math.min(...data)}–{Math.max(...data)}
+            {minMax}
           </span>
         )}
       </div>
