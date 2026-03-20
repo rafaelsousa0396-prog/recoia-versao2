@@ -781,10 +781,8 @@ function VitalsTab({ patient }: { patient: typeof patients[0] }) {
 function VitalCard({ icon: Icon, label, value, unit, data, danger }: {
   icon: React.ElementType; label: string; value: string; unit: string; data?: (number | string)[]; danger?: boolean;
 }) {
-  const minMax = data && data.length > 0
-    ? typeof data[0] === "number"
-      ? `${Math.min(...(data as number[]))}–${Math.max(...(data as number[]))}`
-      : `${data[0]}…${data[data.length - 1]}`
+  const minMax = data && data.length > 0 && typeof data[0] === "number"
+    ? `${Math.min(...(data as number[]))}–${Math.max(...(data as number[]))}`
     : null;
 
   return (
