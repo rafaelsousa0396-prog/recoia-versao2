@@ -27,7 +27,7 @@ export function AppSidebar() {
   const location = useLocation();
   const { currentHospital } = useAuth();
   const isActive = (path: string) => location.pathname === path;
-  const isAdmin = currentHospital?.role === "admin" || currentHospital?.role === "super_admin";
+  const isAdmin = currentHospital?.role === "admin" || (currentHospital?.role as string) === "super_admin";
 
   return (
     <Sidebar collapsible="icon">
