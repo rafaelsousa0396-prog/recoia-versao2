@@ -54,16 +54,19 @@ export default function Patients() {
       </div>
 
       {/* Search & Filters */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por nome, leito ou diagnóstico..."
-            className="clinical-input !pl-9 !py-2 text-sm w-full"
-          />
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row gap-3 items-end">
+        <div className="flex flex-col gap-1 flex-1">
+          <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Buscar</label>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar por nome, leito ou diagnóstico..."
+              className="clinical-input !pl-9 !py-1.5 text-xs w-full"
+            />
+          </div>
         </div>
         <div className="flex gap-3 items-end flex-wrap">
           <Filter className="w-3.5 h-3.5 text-muted-foreground mb-2" />
