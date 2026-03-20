@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Plus, Building2, Users, Shield, Search } from "lucide-react";
+import { Plus, Building2, Users, Shield, Search, LayoutGrid, Pencil } from "lucide-react";
 
 const ROLES = [
   { value: "super_admin", label: "Super Admin" },
@@ -31,6 +31,7 @@ const ESTADOS = [
 
 type Profile = { id: string; nome: string; email: string; registro: string };
 type Hospital = { id: string; nome: string; cidade: string; estado: string; ativo: boolean };
+type Setor = { id: string; hospital_id: string; nome: string; numero_leitos: number; ativo: boolean };
 type UserHospitalLink = {
   id: string; user_id: string; hospital_id: string; role: string; ativo: boolean;
   profile?: Profile; hospital?: Hospital;
@@ -50,18 +51,21 @@ export default function Admin() {
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [links, setLinks] = useState<UserHospitalLink[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [setores, setSetores] = useState<Setor[]>([]);
   const [searchUsers, setSearchUsers] = useState("");
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const [{ data: h }, { data: l }, { data: p }] = await Promise.all([
+    const [{ data: h }, { data: l }, { data: p }, { data: s }] = await Promise.all([
       supabase.from("hospitals").select("*").order("nome"),
       supabase.from("user_hospitals").select("*"),
       supabase.from("profiles").select("*").order("nome"),
+      supabase.from("setores").select("*").order("nome"),
     ]);
     setHospitals((h as Hospital[]) || []);
     setProfiles((p as Profile[]) || []);
+    setSetores((s as Setor[]) || []);
 
     // Enrich links
     const enriched = (l || []).map((link: any) => ({
@@ -107,6 +111,9 @@ export default function Admin() {
           </TabsTrigger>
           <TabsTrigger value="permissions" className="gap-1.5">
             <Shield className="w-3.5 h-3.5" /> Vínculos
+          </TabsTrigger>
+          <TabsTrigger value="setores" className="gap-1.5">
+            <LayoutGrid className="w-3.5 h-3.5" /> Setores
           </TabsTrigger>
         </TabsList>
 
@@ -244,6 +251,61 @@ export default function Admin() {
               </Table>
             </CardContent>
           </Card>
+        </TabsContent>
+        {/* SETORES TAB */}
+        <TabsContent value="setores" className="space-y-4">
+          <div className="flex justify-end">
+            <CreateSetorDialog hospitals={hospitals} onCreated={fetchData} />
+          </div>
+          {hospitals.filter(h => h.ativo).map((h) => {
+            const hospitalSetores = setores.filter(s => s.hospital_id === h.id);
+            if (hospitalSetores.length === 0 && hospitals.filter(ho => ho.ativo).length > 1) return null;
+            return (
+              <Card key={h.id}>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Building2 className="w-3.5 h-3.5 text-muted-foreground" />
+                    {h.nome}
+                    <Badge variant="secondary" className="text-[10px] ml-auto">
+                      {hospitalSetores.length} setor(es)
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  {hospitalSetores.length === 0 ? (
+                    <p className="text-xs text-muted-foreground px-6 pb-4">Nenhum setor cadastrado</p>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-xs">Setor</TableHead>
+                          <TableHead className="text-xs">Leitos</TableHead>
+                          <TableHead className="text-xs">Status</TableHead>
+                          <TableHead className="text-xs">Ações</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {hospitalSetores.map((s) => (
+                          <TableRow key={s.id}>
+                            <TableCell className="text-xs font-medium">{s.nome}</TableCell>
+                            <TableCell className="text-xs">{s.numero_leitos}</TableCell>
+                            <TableCell>
+                              <Badge variant={s.ativo ? "default" : "secondary"} className="text-[10px]">
+                                {s.ativo ? "Ativo" : "Inativo"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <ToggleSetorButton setor={s} onUpdated={fetchData} />
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
         </TabsContent>
       </Tabs>
     </div>
@@ -497,6 +559,96 @@ function UpdateLinkActions({ link, onUpdated }: { link: UserHospitalLink; onUpda
       disabled={submitting}
     >
       {link.ativo ? "Desativar" : "Reativar"}
+    </Button>
+  );
+}
+
+function CreateSetorDialog({ hospitals, onCreated }: { hospitals: Hospital[]; onCreated: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({ hospital_id: "", nome: "", numero_leitos: "" });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.from("setores").insert({
+        hospital_id: form.hospital_id,
+        nome: form.nome.trim(),
+        numero_leitos: parseInt(form.numero_leitos) || 0,
+      });
+      if (error) throw error;
+      toast.success("Setor criado com sucesso");
+      setOpen(false);
+      setForm({ hospital_id: "", nome: "", numero_leitos: "" });
+      onCreated();
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+    setSubmitting(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" className="gap-1.5">
+          <Plus className="w-3.5 h-3.5" /> Novo Setor
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="text-sm">Cadastrar Setor</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div className="space-y-1.5">
+            <Label className="text-xs">Hospital</Label>
+            <Select value={form.hospital_id} onValueChange={(v) => setForm({ ...form, hospital_id: v })}>
+              <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <SelectContent>
+                {hospitals.filter(h => h.ativo).map((h) => (
+                  <SelectItem key={h.id} value={h.id}>{h.nome}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs">Nome do Setor</Label>
+              <Input value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} placeholder="Ex: UTI, Enfermaria" required />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Nº de Leitos</Label>
+              <Input type="number" min="0" value={form.numero_leitos} onChange={(e) => setForm({ ...form, numero_leitos: e.target.value })} placeholder="0" required />
+            </div>
+          </div>
+          <Button type="submit" className="w-full" disabled={submitting || !form.hospital_id || !form.nome.trim()}>
+            {submitting ? "Criando..." : "Criar Setor"}
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ToggleSetorButton({ setor, onUpdated }: { setor: Setor; onUpdated: () => void }) {
+  const [submitting, setSubmitting] = useState(false);
+
+  const toggle = async () => {
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.from("setores").update({ ativo: !setor.ativo }).eq("id", setor.id);
+      if (error) throw error;
+      toast.success(setor.ativo ? "Setor desativado" : "Setor reativado");
+      onUpdated();
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+    setSubmitting(false);
+  };
+
+  return (
+    <Button variant={setor.ativo ? "ghost" : "outline"} size="sm" className="text-[10px] h-7" onClick={toggle} disabled={submitting}>
+      {setor.ativo ? "Desativar" : "Reativar"}
     </Button>
   );
 }

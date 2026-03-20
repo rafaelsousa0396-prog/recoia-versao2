@@ -201,6 +201,41 @@ export type Database = {
         }
         Relationships: []
       }
+      setores: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          hospital_id: string
+          id: string
+          nome: string
+          numero_leitos: number
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          hospital_id: string
+          id?: string
+          nome: string
+          numero_leitos?: number
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          hospital_id?: string
+          id?: string
+          nome?: string
+          numero_leitos?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "setores_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_hospitals: {
         Row: {
           ativo: boolean
