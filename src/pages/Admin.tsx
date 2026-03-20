@@ -207,6 +207,82 @@ export default function Admin() {
   );
 }
 
+/* ---- Hospital Card with Setores ---- */
+
+function HospitalCard({ hospital: h, profissionaisCount, setores: hospitalSetores, hospitals, onUpdated }: {
+  hospital: Hospital; profissionaisCount: number; setores: Setor[]; hospitals: Hospital[]; onUpdated: () => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <Collapsible open={expanded} onOpenChange={setExpanded}>
+      <Card className={!h.ativo ? "opacity-50" : ""}>
+        <CollapsibleTrigger asChild>
+          <CardHeader className="pb-2 cursor-pointer hover:bg-muted/30 transition-colors rounded-t-lg">
+            <CardTitle className="text-sm flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-muted-foreground" />
+                <span>{h.nome}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="text-[10px]">
+                  {hospitalSetores.length} setor(es)
+                </Badge>
+                <Badge variant={h.ativo ? "default" : "secondary"} className="text-[10px]">
+                  {h.ativo ? "Ativo" : "Inativo"}
+                </Badge>
+                <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${expanded ? "rotate-180" : ""}`} />
+              </div>
+            </CardTitle>
+          </CardHeader>
+        </CollapsibleTrigger>
+        <CardContent className="pb-2">
+          <p className="text-xs text-muted-foreground">{h.cidade}, {h.estado}</p>
+          <p className="text-xs text-muted-foreground mt-1">{profissionaisCount} profissional(is) vinculado(s)</p>
+        </CardContent>
+        <CollapsibleContent>
+          <div className="border-t px-4 py-3 space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium text-foreground">Setores</p>
+              <CreateSetorDialog hospitals={[h]} onCreated={onUpdated} singleHospital />
+            </div>
+            {hospitalSetores.length === 0 ? (
+              <p className="text-xs text-muted-foreground py-2">Nenhum setor cadastrado neste hospital.</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-xs">Setor</TableHead>
+                    <TableHead className="text-xs">Leitos</TableHead>
+                    <TableHead className="text-xs">Status</TableHead>
+                    <TableHead className="text-xs">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {hospitalSetores.map((s) => (
+                    <TableRow key={s.id}>
+                      <TableCell className="text-xs font-medium">{s.nome}</TableCell>
+                      <TableCell className="text-xs">{s.numero_leitos}</TableCell>
+                      <TableCell>
+                        <Badge variant={s.ativo ? "default" : "secondary"} className="text-[10px]">
+                          {s.ativo ? "Ativo" : "Inativo"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <ToggleSetorButton setor={s} onUpdated={onUpdated} />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </div>
+        </CollapsibleContent>
+      </Card>
+    </Collapsible>
+  );
+}
+
 /* ---- Dialogs ---- */
 
 function CreateUserDialog({ hospitals, onCreated }: { hospitals: Hospital[]; onCreated: () => void }) {
