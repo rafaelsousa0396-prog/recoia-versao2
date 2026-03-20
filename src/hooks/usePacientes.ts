@@ -98,25 +98,31 @@ export function useInternacao(internacaoId: string | undefined) {
   });
 }
 
+export interface SetorInfo {
+  id: string;
+  nome: string;
+  numero_leitos: number;
+  ativo: boolean;
+}
+
 export function useSetores() {
   const { currentHospital } = useAuth();
   const hospitalId = currentHospital?.hospital_id;
 
   return useQuery({
     queryKey: ["setores", hospitalId],
-    queryFn: async (): Promise<string[]> => {
+    queryFn: async (): Promise<SetorInfo[]> => {
       if (!hospitalId) return [];
 
       const { data, error } = await supabase
-        .from("internacoes")
-        .select("setor")
+        .from("setores")
+        .select("id, nome, numero_leitos, ativo")
         .eq("hospital_id", hospitalId)
-        .in("status", ["internado", "uti"])
-        .not("setor", "is", null);
+        .eq("ativo", true)
+        .order("nome");
 
       if (error) throw error;
-      const setores = [...new Set((data || []).map((d: any) => d.setor).filter(Boolean))];
-      return ["Todos", ...setores.sort()];
+      return (data as SetorInfo[]) || [];
     },
     enabled: !!hospitalId,
   });
