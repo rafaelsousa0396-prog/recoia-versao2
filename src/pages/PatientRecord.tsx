@@ -289,7 +289,7 @@ function EvolutionTab({ internacaoId, paciente, internacao }: { internacaoId: st
       await createEvolucao.mutateAsync({
         internacaoId,
         conteudo: generatedText,
-        role: selectedRole,
+        role: userRoleDisplay,
         geradoPorIa: true,
         inputIa: inputText,
       });
