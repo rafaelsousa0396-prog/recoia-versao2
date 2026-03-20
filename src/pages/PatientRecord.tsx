@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Brain, FileText, ClipboardList, Pill, Activity, ChevronRight, Sparkles, CheckCircle2, Calendar, User } from "lucide-react";
 import { differenceInDays, differenceInYears, format, parseISO } from "date-fns";
@@ -196,12 +197,23 @@ function PlaceholderSection({ title, message }: { title: string; message: string
 }
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-evolution`;
-const roles = ["Médico", "Enfermagem", "Fisioterapia", "Assistente Social", "Psicologia", "Fonoaudiologia", "Farmácia"];
+
+const roleDisplayMap: Record<string, string> = {
+  medico: "Médico",
+  enfermagem: "Enfermagem",
+  fisio: "Fisioterapia",
+  assistente_social: "Assistente Social",
+  farmacia: "Farmácia",
+  admin: "Administrador",
+  super_admin: "Administrador",
+  recepcao: "Recepção",
+};
 
 function EvolutionTab({ internacaoId, paciente, internacao }: { internacaoId: string; paciente: any; internacao: any }) {
   const { data: evolucoes = [], isLoading } = useEvolucoes(internacaoId);
   const createEvolucao = useCreateEvolucao();
-  const [selectedRole, setSelectedRole] = useState(roles[0]);
+  const { currentRole } = useAuth();
+  const userRoleDisplay = roleDisplayMap[currentRole || "medico"] || "Médico";
   const [inputText, setInputText] = useState("");
   const [generatedText, setGeneratedText] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -226,7 +238,7 @@ function EvolutionTab({ internacaoId, paciente, internacao }: { internacaoId: st
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ input: inputText, patientContext, role: selectedRole }),
+        body: JSON.stringify({ input: inputText, patientContext, role: userRoleDisplay }),
       });
 
       if (!resp.ok) {
@@ -277,7 +289,7 @@ function EvolutionTab({ internacaoId, paciente, internacao }: { internacaoId: st
       await createEvolucao.mutateAsync({
         internacaoId,
         conteudo: generatedText,
-        role: selectedRole,
+        role: userRoleDisplay,
         geradoPorIa: true,
         inputIa: inputText,
       });
@@ -298,7 +310,7 @@ function EvolutionTab({ internacaoId, paciente, internacao }: { internacaoId: st
       await createEvolucao.mutateAsync({
         internacaoId,
         conteudo: inputText,
-        role: selectedRole,
+        role: userRoleDisplay,
         geradoPorIa: false,
       });
       toast.success("Evolução salva com sucesso");
@@ -334,19 +346,10 @@ function EvolutionTab({ internacaoId, paciente, internacao }: { internacaoId: st
         </div>
       </div>
 
-      {/* Role selector */}
+      {/* Role display */}
       <div className="flex items-center gap-3">
         <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Perfil profissional:</label>
-        <Select value={selectedRole} onValueChange={setSelectedRole}>
-          <SelectTrigger className="w-[180px] h-8 text-xs">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {roles.map(r => (
-              <SelectItem key={r} value={r} className="text-xs">{r}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <span className="text-xs font-medium px-3 py-1.5 rounded-md bg-secondary text-foreground">{userRoleDisplay}</span>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
