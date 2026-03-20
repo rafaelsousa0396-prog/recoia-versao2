@@ -754,7 +754,9 @@ function VitalsTab({ patient }: { patient: typeof patients[0] }) {
               </p>
               {v.data && (
                 <span className={`text-xs font-mono ${v.danger ? "text-risk-high" : "text-muted-foreground"}`}>
-                  {Math.min(...v.data)}–{Math.max(...v.data)}
+                  {typeof v.data[0] === "number"
+                    ? `${Math.min(...(v.data as number[]))}–${Math.max(...(v.data as number[]))}`
+                    : `${v.data[0]}…${v.data[v.data.length - 1]}`}
                 </span>
               )}
             </div>
