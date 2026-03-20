@@ -15,8 +15,8 @@ export interface Patient {
   vitals: {
     fc: number[];
     satO2: number[];
-    pa: string;
-    temp: number;
+    pa: string[];
+    temp: number[];
   };
   alerts: string[];
 }
