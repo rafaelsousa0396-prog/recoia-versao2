@@ -16,6 +16,7 @@ import PatientRecord from "./pages/PatientRecord";
 import BedManagement from "./pages/BedManagement";
 import Login from "./pages/Login";
 import SelectHospital from "./pages/SelectHospital";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
