@@ -238,7 +238,7 @@ function EvolutionTab({ internacaoId, paciente, internacao }: { internacaoId: st
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ input: inputText, patientContext, role: selectedRole }),
+        body: JSON.stringify({ input: inputText, patientContext, role: userRoleDisplay }),
       });
 
       if (!resp.ok) {
