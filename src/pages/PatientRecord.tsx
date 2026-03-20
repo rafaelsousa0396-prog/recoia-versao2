@@ -101,8 +101,8 @@ function SummaryTab({ patient }: { patient: typeof patients[0] }) {
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <VitalCard icon={Heart} label="FC" value={`${patient.vitals.fc[patient.vitals.fc.length - 1]}`} unit="bpm" data={patient.vitals.fc} danger={patient.vitals.fc[patient.vitals.fc.length - 1] > 100} />
         <VitalCard icon={Droplets} label="SpO₂" value={`${patient.vitals.satO2[patient.vitals.satO2.length - 1]}`} unit="%" data={patient.vitals.satO2} danger={patient.vitals.satO2[patient.vitals.satO2.length - 1] < 92} />
-        <VitalCard icon={Activity} label="PA" value={patient.vitals.pa} unit="mmHg" />
-        <VitalCard icon={Thermometer} label="Temp" value={`${patient.vitals.temp}`} unit="°C" danger={patient.vitals.temp > 37.5} />
+        <VitalCard icon={Activity} label="PA" value={patient.vitals.pa[patient.vitals.pa.length - 1]} unit="mmHg" data={patient.vitals.pa} />
+        <VitalCard icon={Thermometer} label="Temp" value={`${patient.vitals.temp[patient.vitals.temp.length - 1]}`} unit="°C" data={patient.vitals.temp} danger={patient.vitals.temp[patient.vitals.temp.length - 1] > 37.5} />
       </motion.div>
 
       {/* Alerts */}
