@@ -534,24 +534,25 @@ function UpdateLinkActions({ link, onUpdated }: { link: UserHospitalLink; onUpda
   );
 }
 
-function CreateSetorDialog({ hospitals, onCreated }: { hospitals: Hospital[]; onCreated: () => void }) {
+function CreateSetorDialog({ hospitals, onCreated, singleHospital }: { hospitals: Hospital[]; onCreated: () => void; singleHospital?: boolean }) {
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({ hospital_id: "", nome: "", numero_leitos: "" });
+  const defaultHospitalId = singleHospital && hospitals.length === 1 ? hospitals[0].id : "";
+  const [form, setForm] = useState({ hospital_id: defaultHospitalId, nome: "", numero_leitos: "" });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     try {
       const { error } = await supabase.from("setores").insert({
-        hospital_id: form.hospital_id,
+        hospital_id: form.hospital_id || defaultHospitalId,
         nome: form.nome.trim(),
         numero_leitos: parseInt(form.numero_leitos) || 0,
       });
       if (error) throw error;
       toast.success("Setor criado com sucesso");
       setOpen(false);
-      setForm({ hospital_id: "", nome: "", numero_leitos: "" });
+      setForm({ hospital_id: defaultHospitalId, nome: "", numero_leitos: "" });
       onCreated();
     } catch (err: any) {
       toast.error(err.message);
@@ -562,8 +563,8 @@ function CreateSetorDialog({ hospitals, onCreated }: { hospitals: Hospital[]; on
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" className="gap-1.5">
-          <Plus className="w-3.5 h-3.5" /> Novo Setor
+        <Button size="sm" variant="outline" className="gap-1.5 h-7 text-[10px]">
+          <Plus className="w-3 h-3" /> Adicionar Setor
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -571,17 +572,19 @@ function CreateSetorDialog({ hospitals, onCreated }: { hospitals: Hospital[]; on
           <DialogTitle className="text-sm">Cadastrar Setor</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-3">
-          <div className="space-y-1.5">
-            <Label className="text-xs">Hospital</Label>
-            <Select value={form.hospital_id} onValueChange={(v) => setForm({ ...form, hospital_id: v })}>
-              <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-              <SelectContent>
-                {hospitals.filter(h => h.ativo).map((h) => (
-                  <SelectItem key={h.id} value={h.id}>{h.nome}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {!singleHospital && (
+            <div className="space-y-1.5">
+              <Label className="text-xs">Hospital</Label>
+              <Select value={form.hospital_id} onValueChange={(v) => setForm({ ...form, hospital_id: v })}>
+                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectContent>
+                  {hospitals.filter(h => h.ativo).map((h) => (
+                    <SelectItem key={h.id} value={h.id}>{h.nome}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label className="text-xs">Nome do Setor</Label>
