@@ -63,7 +63,7 @@ export default function Patients() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar por nome, leito ou diagnóstico..."
+              placeholder="Nome, leito, diagnóstico..."
               className="clinical-input !pl-9 !py-1.5 text-xs w-full"
             />
           </div>
