@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Brain, FileText, ClipboardList, Pill, Activity, ChevronRight, Sparkles, CheckCircle2, Calendar, User } from "lucide-react";
 import { differenceInDays, differenceInYears, format, parseISO } from "date-fns";
