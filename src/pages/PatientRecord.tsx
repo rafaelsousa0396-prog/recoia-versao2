@@ -346,19 +346,10 @@ function EvolutionTab({ internacaoId, paciente, internacao }: { internacaoId: st
         </div>
       </div>
 
-      {/* Role selector */}
+      {/* Role display */}
       <div className="flex items-center gap-3">
         <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Perfil profissional:</label>
-        <Select value={selectedRole} onValueChange={setSelectedRole}>
-          <SelectTrigger className="w-[180px] h-8 text-xs">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {roles.map(r => (
-              <SelectItem key={r} value={r} className="text-xs">{r}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <span className="text-xs font-medium px-3 py-1.5 rounded-md bg-secondary text-foreground">{userRoleDisplay}</span>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
