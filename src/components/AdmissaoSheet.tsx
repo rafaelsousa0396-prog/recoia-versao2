@@ -227,36 +227,66 @@ export function AdmissaoSheet() {
                   )} />
 
                   <div className="grid grid-cols-2 gap-3">
-                    <FormField control={form.control} name="data_nascimento" render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel className="text-xs">Nascimento *</FormLabel>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant="outline"
-                                className={cn("pl-3 text-left font-normal text-xs h-9", !field.value && "text-muted-foreground")}
-                              >
-                                {field.value ? format(field.value, "dd/MM/yyyy") : "Selecione"}
-                                <CalendarIcon className="ml-auto h-3.5 w-3.5 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                              initialFocus
-                              locale={ptBR}
-                              className={cn("p-3 pointer-events-auto")}
+                    <FormField control={form.control} name="data_nascimento" render={({ field }) => {
+                      const [dateText, setDateText] = useState(field.value ? format(field.value, "dd/MM/yyyy") : "");
+                      
+                      const handleDateTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                        let value = e.target.value.replace(/\D/g, "");
+                        if (value.length > 8) value = value.slice(0, 8);
+                        if (value.length >= 5) {
+                          value = value.slice(0, 2) + "/" + value.slice(2, 4) + "/" + value.slice(4);
+                        } else if (value.length >= 3) {
+                          value = value.slice(0, 2) + "/" + value.slice(2);
+                        }
+                        setDateText(value);
+                        
+                        if (value.length === 10) {
+                          const parsed = parse(value, "dd/MM/yyyy", new Date());
+                          if (isValid(parsed) && parsed <= new Date() && parsed >= new Date("1900-01-01")) {
+                            field.onChange(parsed);
+                          }
+                        }
+                      };
+
+                      const handleCalendarSelect = (date: Date | undefined) => {
+                        field.onChange(date);
+                        if (date) setDateText(format(date, "dd/MM/yyyy"));
+                      };
+
+                      return (
+                        <FormItem className="flex flex-col">
+                          <FormLabel className="text-xs">Nascimento *</FormLabel>
+                          <div className="flex gap-1">
+                            <Input
+                              placeholder="dd/mm/aaaa"
+                              value={dateText}
+                              onChange={handleDateTextChange}
+                              className="text-xs h-9 flex-1"
+                              maxLength={10}
                             />
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button variant="outline" size="icon" className="h-9 w-9 shrink-0">
+                                  <CalendarIcon className="h-3.5 w-3.5 opacity-50" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                  mode="single"
+                                  selected={field.value}
+                                  onSelect={handleCalendarSelect}
+                                  disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                                  initialFocus
+                                  locale={ptBR}
+                                  className={cn("p-3 pointer-events-auto")}
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }} />
 
                     <FormField control={form.control} name="sexo" render={({ field }) => (
                       <FormItem>
