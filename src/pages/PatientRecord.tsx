@@ -310,7 +310,7 @@ function EvolutionTab({ internacaoId, paciente, internacao }: { internacaoId: st
       await createEvolucao.mutateAsync({
         internacaoId,
         conteudo: inputText,
-        role: selectedRole,
+        role: userRoleDisplay,
         geradoPorIa: false,
       });
       toast.success("Evolução salva com sucesso");
