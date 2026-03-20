@@ -110,7 +110,7 @@ export const patients: Patient[] = [
     admissionDate: "2026-03-14",
     risk: "high",
     status: "uti",
-    vitals: { fc: [88, 95, 92, 100, 96, 94], satO2: [92, 90, 91, 89, 90, 91], pa: "100/65", temp: 36.8 },
+    vitals: { fc: [88, 95, 92, 100, 96, 94], satO2: [92, 90, 91, 89, 90, 91], pa: ["100/65", "98/60", "105/68", "100/65", "102/66", "100/65"], temp: [36.8, 36.7, 36.9, 36.8, 36.8, 36.7] },
     alerts: ["Troponina em elevação", "BNP > 2000 pg/mL"],
   },
   {
