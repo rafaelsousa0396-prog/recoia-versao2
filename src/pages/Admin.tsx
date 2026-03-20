@@ -252,6 +252,61 @@ export default function Admin() {
             </CardContent>
           </Card>
         </TabsContent>
+        {/* SETORES TAB */}
+        <TabsContent value="setores" className="space-y-4">
+          <div className="flex justify-end">
+            <CreateSetorDialog hospitals={hospitals} onCreated={fetchData} />
+          </div>
+          {hospitals.filter(h => h.ativo).map((h) => {
+            const hospitalSetores = setores.filter(s => s.hospital_id === h.id);
+            if (hospitalSetores.length === 0 && hospitals.filter(ho => ho.ativo).length > 1) return null;
+            return (
+              <Card key={h.id}>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Building2 className="w-3.5 h-3.5 text-muted-foreground" />
+                    {h.nome}
+                    <Badge variant="secondary" className="text-[10px] ml-auto">
+                      {hospitalSetores.length} setor(es)
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  {hospitalSetores.length === 0 ? (
+                    <p className="text-xs text-muted-foreground px-6 pb-4">Nenhum setor cadastrado</p>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-xs">Setor</TableHead>
+                          <TableHead className="text-xs">Leitos</TableHead>
+                          <TableHead className="text-xs">Status</TableHead>
+                          <TableHead className="text-xs">Ações</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {hospitalSetores.map((s) => (
+                          <TableRow key={s.id}>
+                            <TableCell className="text-xs font-medium">{s.nome}</TableCell>
+                            <TableCell className="text-xs">{s.numero_leitos}</TableCell>
+                            <TableCell>
+                              <Badge variant={s.ativo ? "default" : "secondary"} className="text-[10px]">
+                                {s.ativo ? "Ativo" : "Inativo"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <ToggleSetorButton setor={s} onUpdated={fetchData} />
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </TabsContent>
       </Tabs>
     </div>
   );
