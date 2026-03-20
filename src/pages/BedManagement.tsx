@@ -119,7 +119,7 @@ export default function BedManagement() {
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                 {orphanPatients.map((p, i) => (
-                  <BedCard key={p.internacao.id} p={p} i={i} />
+                  <BedCard key={p.internacao.id} p={p} i={i} label={p.internacao.leito || `S/S ${String(i + 1).padStart(2, "0")}`} />
                 ))}
               </div>
             </div>
