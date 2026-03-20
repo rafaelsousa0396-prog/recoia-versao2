@@ -79,6 +79,7 @@ export function AdmissaoSheet() {
   const [step, setStep] = useState<1 | 2>(1);
   const [submitting, setSubmitting] = useState(false);
   const [setoresHospital, setSetoresHospital] = useState<Setor[]>([]);
+  const [availableBeds, setAvailableBeds] = useState<string[]>([]);
   const { currentHospital } = useAuth();
   const queryClient = useQueryClient();
 
