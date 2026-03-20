@@ -141,6 +141,11 @@ function SummaryCard({ label, value, accent }: { label: string; value: string | 
 
 function SectorSection({ setor, patients, disponivel }: { setor: SetorInfo; patients: any[]; disponivel: number }) {
   const ocupacao = setor.numero_leitos > 0 ? Math.round((patients.length / setor.numero_leitos) * 100) : 0;
+  const abbrev = sectorAbbrev(setor.nome);
+
+  // Build all bed slots: occupied ones first, then empty
+  const occupiedCount = patients.length;
+  const emptyStartIndex = occupiedCount;
 
   return (
     <div>
@@ -165,26 +170,31 @@ function SectorSection({ setor, patients, disponivel }: { setor: SetorInfo; pati
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
         {patients.map((p, i) => (
-          <BedCard key={p.internacao.id} p={p} i={i} />
+          <BedCard key={p.internacao.id} p={p} i={i} label={bedLabel(abbrev, i)} />
         ))}
-        {/* Empty beds */}
-        {Array.from({ length: disponivel }).map((_, i) => (
-          <motion.div
-            key={`empty-${setor.id}-${i}`}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: (patients.length + i) * 0.02 }}
-            className="rounded-xl border border-dashed border-muted-foreground/20 p-3 flex items-center justify-center min-h-[72px]"
-          >
-            <span className="text-[10px] text-muted-foreground">Disponível</span>
-          </motion.div>
-        ))}
+        {Array.from({ length: disponivel }).map((_, i) => {
+          const idx = emptyStartIndex + i;
+          return (
+            <motion.div
+              key={`empty-${setor.id}-${i}`}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: idx * 0.02 }}
+              className="rounded-xl border border-dashed border-muted-foreground/20 p-3 min-h-[72px]"
+            >
+              <span className="font-mono text-xs font-semibold text-muted-foreground/50">
+                {bedLabel(abbrev, idx)}
+              </span>
+              <p className="text-[10px] text-muted-foreground mt-1">Disponível</p>
+            </motion.div>
+          );
+        })}
       </div>
     </div>
   );
 }
 
-function BedCard({ p, i }: { p: any; i: number }) {
+function BedCard({ p, i, label }: { p: any; i: number; label: string }) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -194,7 +204,7 @@ function BedCard({ p, i }: { p: any; i: number }) {
     >
       <div className="flex items-center justify-between mb-1">
         <span className="font-mono text-sm font-semibold text-foreground">
-          {p.internacao.leito || "—"}
+          {label}
         </span>
         <div className={`w-2 h-2 rounded-full ${riskColor(p.internacao.risco)}`} />
       </div>
