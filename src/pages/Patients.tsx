@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useInternacoesAtivas, useSetores, useMedicos, type PacienteInternado } from "@/hooks/usePacientes";
 import { differenceInYears } from "date-fns";
+import { AdmissaoSheet } from "@/components/AdmissaoSheet";
 
 const riskLabelsMap: Record<string, string> = { Todos: "Todos", alto: "Alto", moderado: "Moderado", estavel: "Estável" };
 const riskLevels = ["Todos", "alto", "moderado", "estavel"];
@@ -69,9 +70,12 @@ export default function Patients() {
 
   return (
     <div className="p-6 space-y-5 max-w-[1400px] mx-auto">
-      <div>
-        <h1 className="text-lg font-semibold text-foreground">Pacientes Internados</h1>
-        <p className="text-xs text-muted-foreground">{pacientes.length} pacientes · {filtered.length} exibidos</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-lg font-semibold text-foreground">Pacientes Internados</h1>
+          <p className="text-xs text-muted-foreground">{pacientes.length} pacientes · {filtered.length} exibidos</p>
+        </div>
+        <AdmissaoSheet />
       </div>
 
       {/* Search & Filters */}
