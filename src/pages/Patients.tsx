@@ -65,17 +65,26 @@ export default function Patients() {
             className="clinical-input !pl-9 !py-2 text-sm w-full"
           />
         </div>
-        <div className="flex gap-2 items-center flex-wrap">
-          <Filter className="w-3.5 h-3.5 text-muted-foreground" />
-          <select value={sectorFilter} onChange={(e) => setSectorFilter(e.target.value)} className="clinical-input !w-auto !py-1.5 text-xs">
-            {sectors.map((s) => <option key={s} value={s}>{s === "Todos" ? "Setor" : s}</option>)}
-          </select>
-          <select value={riskFilter} onChange={(e) => setRiskFilter(e.target.value)} className="clinical-input !w-auto !py-1.5 text-xs">
-            {riskLevels.map((r) => <option key={r} value={r}>{r === "Todos" ? "Risco" : riskLabelsMap[r]}</option>)}
-          </select>
-          <select value={doctorFilter} onChange={(e) => setDoctorFilter(e.target.value)} className="clinical-input !w-auto !py-1.5 text-xs">
-            {doctors.map((d) => <option key={d} value={d}>{d === "Todos" ? "Médico" : d}</option>)}
-          </select>
+        <div className="flex gap-3 items-end flex-wrap">
+          <Filter className="w-3.5 h-3.5 text-muted-foreground mb-2" />
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Setor</label>
+            <select value={sectorFilter} onChange={(e) => setSectorFilter(e.target.value)} className="clinical-input !w-auto !py-1.5 text-xs">
+              {sectors.map((s) => <option key={s} value={s}>{s === "Todos" ? "Todos" : s}</option>)}
+            </select>
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Risco</label>
+            <select value={riskFilter} onChange={(e) => setRiskFilter(e.target.value)} className="clinical-input !w-auto !py-1.5 text-xs">
+              {riskLevels.map((r) => <option key={r} value={r}>{r === "Todos" ? "Todos" : riskLabelsMap[r]}</option>)}
+            </select>
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Médico</label>
+            <select value={doctorFilter} onChange={(e) => setDoctorFilter(e.target.value)} className="clinical-input !w-auto !py-1.5 text-xs">
+              {doctors.map((d) => <option key={d} value={d}>{d === "Todos" ? "Todos" : d}</option>)}
+            </select>
+          </div>
         </div>
       </motion.div>
 
