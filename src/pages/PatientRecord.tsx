@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
 import { ArrowLeft, Heart, Droplets, Thermometer, Activity, Brain, FileText, ClipboardList, Pill, Clock, AlertTriangle, CheckCircle2 as Check2, Calendar, User, ChevronDown } from "lucide-react";
 import { differenceInDays, format, parseISO } from "date-fns";
