@@ -110,6 +110,7 @@ function AppLayout() {
               <Route path="/pacientes" element={<ProtectedRoute><Patients /></ProtectedRoute>} />
               <Route path="/paciente/:id/*" element={<ProtectedRoute><PatientRecord /></ProtectedRoute>} />
               <Route path="/leitos" element={<ProtectedRoute><BedManagement /></ProtectedRoute>} />
+              <Route path="/admin" element={<ProtectedRoute allowedRoles={["admin", "super_admin"]}><Admin /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
