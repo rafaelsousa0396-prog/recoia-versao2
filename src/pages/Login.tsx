@@ -9,12 +9,6 @@ import { Brain, LogIn, UserPlus, AlertCircle } from "lucide-react";
 export default function Login() {
   const { signIn, signUp, user, loading } = useAuth();
   const [isSignUp, setIsSignUp] = useState(false);
-
-  // Redirect if already logged in
-  if (!loading && user) {
-    return <Navigate to="/" replace />;
-  }
-  const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nome, setNome] = useState("");
@@ -22,6 +16,11 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Redirect if already logged in
+  if (!loading && user) {
+    return <Navigate to="/" replace />;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
