@@ -71,12 +71,26 @@ const estadosBR = [
   "PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"
 ];
 
+type Setor = { id: string; nome: string; numero_leitos: number; ativo: boolean };
+
 export function AdmissaoSheet() {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<1 | 2>(1);
   const [submitting, setSubmitting] = useState(false);
+  const [setoresHospital, setSetoresHospital] = useState<Setor[]>([]);
   const { currentHospital } = useAuth();
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!currentHospital?.hospital_id) return;
+    supabase
+      .from("setores")
+      .select("id, nome, numero_leitos, ativo")
+      .eq("hospital_id", currentHospital.hospital_id)
+      .eq("ativo", true)
+      .order("nome")
+      .then(({ data }) => setSetoresHospital((data as Setor[]) || []));
+  }, [currentHospital?.hospital_id]);
 
   const form = useForm<AdmissaoForm>({
     resolver: zodResolver(admissaoSchema),
