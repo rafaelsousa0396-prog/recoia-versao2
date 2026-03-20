@@ -34,11 +34,19 @@ function LiveClock() {
   return (
     <div className="flex items-center gap-3 w-full justify-between">
       <span className="text-xs text-muted-foreground">{hospitalName} • {date} • {time}</span>
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-muted-foreground">{profile?.nome}</span>
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center">
+            <span className="text-[10px] font-semibold text-muted-foreground">
+              {profile?.nome?.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase() || "U"}
+            </span>
+          </div>
+          <span className="text-xs font-medium text-foreground">{profile?.nome}</span>
+        </div>
+        <div className="w-px h-4 bg-border" />
         <button
           onClick={signOut}
-          className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+          className="text-xs text-muted-foreground hover:text-destructive transition-colors"
         >
           Sair
         </button>
