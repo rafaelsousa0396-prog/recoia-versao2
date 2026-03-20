@@ -76,7 +76,7 @@ export const patients: Patient[] = [
     admissionDate: "2026-03-15",
     risk: "high",
     status: "uti",
-    vitals: { fc: [98, 102, 110, 105, 112, 108], satO2: [91, 89, 88, 90, 87, 89], pa: "90/60", temp: 38.7 },
+    vitals: { fc: [98, 102, 110, 105, 112, 108], satO2: [91, 89, 88, 90, 87, 89], pa: ["90/60", "88/58", "92/62", "90/60", "95/65", "90/60"], temp: [38.7, 38.5, 38.9, 39.0, 38.6, 38.7] },
     alerts: ["NEWS 2: 7 pontos - Risco de deterioração", "Lactato elevado: 4.2 mmol/L"],
   },
   {
