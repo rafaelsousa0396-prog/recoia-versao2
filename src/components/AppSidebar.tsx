@@ -25,7 +25,9 @@ export function AppSidebar() {
   const { state, toggleSidebar } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
+  const { currentHospital } = useAuth();
   const isActive = (path: string) => location.pathname === path;
+  const isAdmin = currentHospital?.role === "admin" || currentHospital?.role === "super_admin";
 
   return (
     <Sidebar collapsible="icon">
