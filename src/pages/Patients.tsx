@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { Search, ArrowUpAZ, ArrowDownZA, ArrowUp01, ArrowDown10 } from "lucide-react";
+import { useState, useMemo } from "react"; 
+import { Search, Filter, ArrowUpAZ, ArrowDownZA, ArrowUp01, ArrowDown10 } from "lucide-react";
 import { motion } from "framer-motion";
 import { PatientRow } from "@/components/PatientRow";
 import { patients, sectors, doctors, riskLevels } from "@/data/mockData";
@@ -16,7 +16,7 @@ export default function Patients() {
 
   const toggleSort = (col: "name" | "bed") => {
     if (sortCol === col) {
-      setSortDir((prev) => prev === "asc" ? "desc" : "asc");
+      setSortDir(prev => prev === "asc" ? "desc" : "asc");
     } else {
       setSortCol(col);
       setSortDir("asc");
@@ -54,28 +54,40 @@ export default function Patients() {
       </div>
 
       {/* Search & Filters */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row gap-3 items-end">
+        <div className="flex flex-col gap-1 flex-1">
+          <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider inline-flex items-center gap-1">
+            <Search className="w-3 h-3" />
+            Buscar
+          </label>
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por nome, leito ou diagnóstico..."
-            className="clinical-input !pl-9 !py-2 text-sm w-full" />
-          
+            placeholder="Nome, leito, diagnóstico..."
+            className="clinical-input !py-1.5 text-xs w-full"
+          />
         </div>
-        <div className="flex gap-2 items-center flex-wrap">
-          
-          <select value={sectorFilter} onChange={(e) => setSectorFilter(e.target.value)} className="clinical-input !w-auto !py-1.5 text-xs">
-            {sectors.map((s) => <option key={s} value={s}>{s === "Todos" ? "Setor" : s}</option>)}
-          </select>
-          <select value={riskFilter} onChange={(e) => setRiskFilter(e.target.value)} className="clinical-input !w-auto !py-1.5 text-xs">
-            {riskLevels.map((r) => <option key={r} value={r}>{r === "Todos" ? "Risco" : riskLabelsMap[r]}</option>)}
-          </select>
-          <select value={doctorFilter} onChange={(e) => setDoctorFilter(e.target.value)} className="clinical-input !w-auto !py-1.5 text-xs">
-            {doctors.map((d) => <option key={d} value={d}>{d === "Todos" ? "Médico" : d}</option>)}
-          </select>
+        <div className="flex gap-3 items-end flex-wrap">
+          <Filter className="w-3.5 h-3.5 text-muted-foreground mb-2" />
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Setor</label>
+            <select value={sectorFilter} onChange={(e) => setSectorFilter(e.target.value)} className="clinical-input !w-auto !py-1.5 text-xs">
+              {sectors.map((s) => <option key={s} value={s}>{s === "Todos" ? "Todos" : s}</option>)}
+            </select>
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Risco</label>
+            <select value={riskFilter} onChange={(e) => setRiskFilter(e.target.value)} className="clinical-input !w-auto !py-1.5 text-xs">
+              {riskLevels.map((r) => <option key={r} value={r}>{r === "Todos" ? "Todos" : riskLabelsMap[r]}</option>)}
+            </select>
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Médico</label>
+            <select value={doctorFilter} onChange={(e) => setDoctorFilter(e.target.value)} className="clinical-input !w-auto !py-1.5 text-xs">
+              {doctors.map((d) => <option key={d} value={d}>{d === "Todos" ? "Todos" : d}</option>)}
+            </select>
+          </div>
         </div>
       </motion.div>
 
@@ -87,8 +99,8 @@ export default function Patients() {
               <tr className="border-b bg-secondary/50">
                 <th
                   className="text-left px-4 py-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer select-none hover:text-foreground transition-colors"
-                  onClick={() => toggleSort("name")}>
-                  
+                  onClick={() => toggleSort("name")}
+                >
                   <span className="inline-flex items-center gap-1">
                     Paciente
                     {sortCol === "name" && (sortDir === "asc" ? <ArrowUpAZ className="w-3 h-3" /> : <ArrowDownZA className="w-3 h-3" />)}
@@ -96,8 +108,8 @@ export default function Patients() {
                 </th>
                 <th
                   className="text-left px-4 py-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer select-none hover:text-foreground transition-colors"
-                  onClick={() => toggleSort("bed")}>
-                  
+                  onClick={() => toggleSort("bed")}
+                >
                   <span className="inline-flex items-center gap-1">
                     Leito
                     {sortCol === "bed" && (sortDir === "asc" ? <ArrowUp01 className="w-3 h-3" /> : <ArrowDown10 className="w-3 h-3" />)}
@@ -111,19 +123,19 @@ export default function Patients() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {filtered.length > 0 ?
-              filtered.map((p, i) => <PatientRow key={p.id} patient={p} index={i} />) :
-
-              <tr>
+              {filtered.length > 0 ? (
+                filtered.map((p, i) => <PatientRow key={p.id} patient={p} index={i} />)
+              ) : (
+                <tr>
                   <td colSpan={7} className="text-center py-10 text-sm text-muted-foreground">
                     Nenhum paciente encontrado.
                   </td>
                 </tr>
-              }
+              )}
             </tbody>
           </table>
         </div>
       </div>
-    </div>);
-
+    </div>
+  );
 }
