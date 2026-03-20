@@ -170,7 +170,6 @@ function SummaryTab({ internacao, paciente }: { internacao: any; paciente: any }
   );
 }
 
-const riskLabelsMap: Record<string, string> = { alto: "Alto", moderado: "Moderado", estavel: "Estável" };
 
 function InfoRow({ label, value }: { label: string; value: string | null | undefined }) {
   return (
