@@ -31,6 +31,7 @@ const ESTADOS = [
 
 type Profile = { id: string; nome: string; email: string; registro: string };
 type Hospital = { id: string; nome: string; cidade: string; estado: string; ativo: boolean };
+type Setor = { id: string; hospital_id: string; nome: string; numero_leitos: number; ativo: boolean };
 type UserHospitalLink = {
   id: string; user_id: string; hospital_id: string; role: string; ativo: boolean;
   profile?: Profile; hospital?: Hospital;
