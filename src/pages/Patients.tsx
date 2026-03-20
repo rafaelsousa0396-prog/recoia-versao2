@@ -16,7 +16,7 @@ function calcAge(dob: string): number {
 export default function Patients() {
   const navigate = useNavigate();
   const { data: pacientes = [], isLoading } = useInternacoesAtivas();
-  const { data: setores = ["Todos"] } = useSetores();
+  const { data: setores = [] } = useSetores();
   const { data: medicos = ["Todos"] } = useMedicos();
 
   const [search, setSearch] = useState("");
