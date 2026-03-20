@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { SparkLine } from "./SparkLine";
 import type { Patient } from "@/data/mockData";
 
 const riskLabels = { high: "Alto", medium: "Moderado", stable: "Estável" };
