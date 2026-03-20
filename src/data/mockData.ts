@@ -144,7 +144,7 @@ export const patients: Patient[] = [
     admissionDate: "2026-03-18",
     risk: "high",
     status: "internado",
-    vitals: { fc: [65, 68, 70, 66, 72, 69], satO2: [95, 94, 93, 94, 93, 94], pa: "180/100", temp: 36.9 },
+    vitals: { fc: [65, 68, 70, 66, 72, 69], satO2: [95, 94, 93, 94, 93, 94], pa: ["180/100", "175/98", "185/105", "180/100", "178/99", "180/100"], temp: [36.9, 36.8, 37.0, 36.9, 36.9, 36.8] },
     alerts: ["PA elevada persistente", "Janela terapêutica trombolítico: 2h restantes"],
   },
   {
