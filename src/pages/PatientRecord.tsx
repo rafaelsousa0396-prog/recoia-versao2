@@ -311,35 +311,59 @@ function EvolutionTab({ patient }: { patient: typeof patients[0] }) {
           <p className="text-sm text-muted-foreground/50 italic text-center py-6">Nenhuma evolução encontrada.</p>
         )}
 
-        {sortedDates.map((date) => (
-          <div key={date} className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
-              <span className="text-xs font-semibold text-foreground">
-                {format(parseISO(date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-              </span>
-            </div>
-            <div className="space-y-2 ml-5 border-l-2 border-border pl-4">
-              {evolutionsByDate[date].sort((a, b) => b.time.localeCompare(a.time)).map((evo) => (
-                <motion.div
-                  key={evo.id}
-                  initial={{ opacity: 0, x: -5 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="bg-card border rounded-xl p-4 clinical-shadow"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium text-foreground">{evo.professional}</span>
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">{evo.role}</span>
+        {sortedDates.map((date) => {
+          const isOpen = openEvoDates.includes(date);
+          return (
+            <div key={date}>
+              <button
+                onClick={() => setOpenEvoDates((prev) =>
+                  prev.includes(date) ? prev.filter((d) => d !== date) : [...prev, date]
+                )}
+                className="flex items-center gap-2 w-full py-2 px-3 rounded-lg hover:bg-secondary/60 transition-colors"
+              >
+                <ChevronRight className={cn("w-3.5 h-3.5 text-muted-foreground transition-transform duration-200", isOpen && "rotate-90")} />
+                <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
+                <span className="text-xs font-semibold text-foreground">
+                  {format(parseISO(date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                </span>
+                <span className="text-[10px] text-muted-foreground ml-auto">
+                  {evolutionsByDate[date].length} {evolutionsByDate[date].length === 1 ? "registro" : "registros"}
+                </span>
+              </button>
+              <AnimatePresence initial={false}>
+                {isOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                    className="overflow-hidden"
+                  >
+                    <div className="space-y-2 ml-5 border-l-2 border-border pl-4 pt-2 pb-1">
+                      {evolutionsByDate[date].sort((a, b) => b.time.localeCompare(a.time)).map((evo) => (
+                        <motion.div
+                          key={evo.id}
+                          initial={{ opacity: 0, x: -5 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          className="bg-card border rounded-xl p-4 clinical-shadow"
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-medium text-foreground">{evo.professional}</span>
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">{evo.role}</span>
+                            </div>
+                            <span className="text-[10px] text-muted-foreground font-mono">{evo.time}</span>
+                          </div>
+                          <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{evo.content}</p>
+                        </motion.div>
+                      ))}
                     </div>
-                    <span className="text-[10px] text-muted-foreground font-mono">{evo.time}</span>
-                  </div>
-                  <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{evo.content}</p>
-                </motion.div>
-              ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
