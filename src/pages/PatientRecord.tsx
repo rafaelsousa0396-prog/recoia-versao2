@@ -752,7 +752,11 @@ function VitalsTab({ patient }: { patient: typeof patients[0] }) {
               <p className={`vital-value text-3xl ${v.danger ? "text-risk-high" : "text-foreground"}`}>
                 {v.value} <span className="text-sm text-muted-foreground font-sans">{v.unit}</span>
               </p>
-              {v.data && <SparkLine data={v.data} color={v.danger ? "hsl(0, 72%, 51%)" : "hsl(200, 80%, 45%)"} width={120} height={40} />}
+              {v.data && (
+                <span className={`text-xs font-mono ${v.danger ? "text-risk-high" : "text-muted-foreground"}`}>
+                  {Math.min(...v.data)}–{Math.max(...v.data)}
+                </span>
+              )}
             </div>
             {v.data && (
               <div className="mt-3 flex gap-2 text-[10px] text-muted-foreground">
