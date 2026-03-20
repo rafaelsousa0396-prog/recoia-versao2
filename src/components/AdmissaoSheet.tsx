@@ -439,7 +439,20 @@ export function AdmissaoSheet() {
                     <FormField control={form.control} name="setor" render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-xs">Setor</FormLabel>
-                        <FormControl><Input placeholder="Ex: UTI, Emergência" {...field} /></FormControl>
+                        <Select onValueChange={field.onChange} value={field.value || ""}>
+                          <FormControl>
+                            <SelectTrigger className="text-xs h-9">
+                              <SelectValue placeholder="Selecione o setor" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {setoresHospital.map((s) => (
+                              <SelectItem key={s.id} value={s.nome} className="text-xs">
+                                {s.nome} ({s.numero_leitos} leitos)
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </FormItem>
                     )} />
                   </div>
