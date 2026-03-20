@@ -57,13 +57,15 @@ export default function Admin() {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const [{ data: h }, { data: l }, { data: p }] = await Promise.all([
+    const [{ data: h }, { data: l }, { data: p }, { data: s }] = await Promise.all([
       supabase.from("hospitals").select("*").order("nome"),
       supabase.from("user_hospitals").select("*"),
       supabase.from("profiles").select("*").order("nome"),
+      supabase.from("setores").select("*").order("nome"),
     ]);
     setHospitals((h as Hospital[]) || []);
     setProfiles((p as Profile[]) || []);
+    setSetores((s as Setor[]) || []);
 
     // Enrich links
     const enriched = (l || []).map((link: any) => ({
