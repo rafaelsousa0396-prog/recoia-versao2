@@ -1,6 +1,7 @@
-import { LayoutDashboard, Users, BedDouble, Brain, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { LayoutDashboard, Users, BedDouble, Brain, ChevronsLeft, ChevronsRight, Settings } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Sidebar,
   SidebarContent,
@@ -24,7 +25,9 @@ export function AppSidebar() {
   const { state, toggleSidebar } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
+  const { currentHospital } = useAuth();
   const isActive = (path: string) => location.pathname === path;
+  const isAdmin = currentHospital?.role === "admin" || (currentHospital?.role as string) === "super_admin";
 
   return (
     <Sidebar collapsible="icon">
@@ -59,6 +62,23 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        {isAdmin && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Administração</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/admin")}>
+                    <NavLink to="/admin" end>
+                      <Settings className="h-4 w-4" />
+                      {!collapsed && <span>Gerenciar</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       <SidebarFooter>
