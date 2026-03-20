@@ -8,6 +8,7 @@ import { CalendarIcon, X, UserPlus, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { sectorAbbrev, bedLabel } from "@/lib/bedUtils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
