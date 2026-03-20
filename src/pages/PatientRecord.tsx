@@ -174,7 +174,7 @@ function SummaryTab({ patient }: { patient: typeof patients[0] }) {
 
 /* ============ EVOLUTION TAB ============ */
 import { Sparkles, Mic, CheckCircle2 } from "lucide-react";
-import { AnimatePresence } from "framer-motion";
+// AnimatePresence already imported at top
 
 const roles = ["Médico", "Enfermagem", "Fisioterapia", "Assistente Social", "Psicologia", "Fonoaudiologia", "Farmácia"];
 
