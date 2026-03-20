@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useInternacoesAtivas, useSetores, useMedicos, type PacienteInternado } from "@/hooks/usePacientes";
 import { differenceInYears } from "date-fns";
+import { AdmissaoSheet } from "@/components/AdmissaoSheet";
 
 const riskLabelsMap: Record<string, string> = { Todos: "Todos", alto: "Alto", moderado: "Moderado", estavel: "Estável" };
 const riskLevels = ["Todos", "alto", "moderado", "estavel"];
