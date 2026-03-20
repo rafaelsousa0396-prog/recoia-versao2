@@ -1,13 +1,17 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Heart, Droplets, Thermometer, Activity, Brain, FileText, ClipboardList, Pill, Clock, AlertTriangle, CheckCircle2 as Check2, Calendar, User, ChevronDown, ChevronRight } from "lucide-react";
+import { ArrowLeft, Heart, Droplets, Thermometer, Activity, Brain, FileText, ClipboardList, Pill, Clock, AlertTriangle, CheckCircle2 as Check2, Calendar, User, ChevronDown, ChevronRight, Sparkles, CheckCircle2 } from "lucide-react";
 import { differenceInDays, differenceInYears, format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useInternacao } from "@/hooks/usePacientes";
+import { useEvolucoes, useCreateEvolucao } from "@/hooks/useEvolucoes";
+import { toast } from "sonner";
+import ReactMarkdown from "react-markdown";
 
 const tabs = [
   { label: "Resumo", path: "", icon: ClipboardList },
