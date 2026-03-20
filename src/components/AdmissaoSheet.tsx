@@ -289,7 +289,7 @@ export function AdmissaoSheet() {
                     }} />
 
                     <FormField control={form.control} name="sexo" render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex flex-col">
                         <FormLabel className="text-xs">Sexo *</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
