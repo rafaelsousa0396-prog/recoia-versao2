@@ -69,7 +69,6 @@ export default function Patients() {
           />
         </div>
         <div className="flex gap-3 items-end flex-wrap">
-          
           <div className="flex flex-col gap-1">
             <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Setor</label>
             <select value={sectorFilter} onChange={(e) => setSectorFilter(e.target.value)} className="clinical-input !w-auto !py-1.5 text-xs">
@@ -88,6 +87,15 @@ export default function Patients() {
               {doctors.map((d) => <option key={d} value={d}>{d === "Todos" ? "Todos" : d}</option>)}
             </select>
           </div>
+          {(search || sectorFilter !== "Todos" || doctorFilter !== "Todos" || riskFilter !== "Todos") && (
+            <button
+              onClick={() => { setSearch(""); setSectorFilter("Todos"); setDoctorFilter("Todos"); setRiskFilter("Todos"); }}
+              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mb-0.5 whitespace-nowrap"
+            >
+              <X className="w-3 h-3" />
+              Limpar filtros
+            </button>
+          )}
         </div>
       </motion.div>
 
