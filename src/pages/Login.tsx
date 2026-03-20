@@ -7,7 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Brain, LogIn, UserPlus, AlertCircle } from "lucide-react";
 
 export default function Login() {
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, user, loading } = useAuth();
+  const [isSignUp, setIsSignUp] = useState(false);
+
+  // Redirect if already logged in
+  if (!loading && user) {
+    return <Navigate to="/" replace />;
+  }
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
