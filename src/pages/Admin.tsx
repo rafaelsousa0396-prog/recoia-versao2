@@ -11,8 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Plus, Building2, Users, Shield, Search, LayoutGrid, Pencil, ChevronDown } from "lucide-react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Plus, Building2, Users, Shield, Search } from "lucide-react";
 
 const ROLES = [
   { value: "super_admin", label: "Super Admin" },
@@ -32,7 +31,6 @@ const ESTADOS = [
 
 type Profile = { id: string; nome: string; email: string; registro: string };
 type Hospital = { id: string; nome: string; cidade: string; estado: string; ativo: boolean };
-type Setor = { id: string; hospital_id: string; nome: string; numero_leitos: number; ativo: boolean };
 type UserHospitalLink = {
   id: string; user_id: string; hospital_id: string; role: string; ativo: boolean;
   profile?: Profile; hospital?: Hospital;
@@ -52,21 +50,18 @@ export default function Admin() {
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [links, setLinks] = useState<UserHospitalLink[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [setores, setSetores] = useState<Setor[]>([]);
   const [searchUsers, setSearchUsers] = useState("");
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const [{ data: h }, { data: l }, { data: p }, { data: s }] = await Promise.all([
+    const [{ data: h }, { data: l }, { data: p }] = await Promise.all([
       supabase.from("hospitals").select("*").order("nome"),
       supabase.from("user_hospitals").select("*"),
       supabase.from("profiles").select("*").order("nome"),
-      supabase.from("setores").select("*").order("nome"),
     ]);
     setHospitals((h as Hospital[]) || []);
     setProfiles((p as Profile[]) || []);
-    setSetores((s as Setor[]) || []);
 
     // Enrich links
     const enriched = (l || []).map((link: any) => ({
@@ -185,101 +180,73 @@ export default function Admin() {
           <div className="flex justify-end">
             <CreateHospitalDialog onCreated={fetchData} />
           </div>
-          <div className="space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {hospitals.map((h) => {
               const count = links.filter((l) => l.hospital_id === h.id && l.ativo).length;
-              const hospitalSetores = setores.filter(s => s.hospital_id === h.id);
               return (
-                <HospitalCard
-                  key={h.id}
-                  hospital={h}
-                  profissionaisCount={count}
-                  setores={hospitalSetores}
-                  hospitals={hospitals}
-                  onUpdated={fetchData}
-                />
+                <Card key={h.id} className={!h.ativo ? "opacity-50" : ""}>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm flex items-center justify-between">
+                      {h.nome}
+                      <Badge variant={h.ativo ? "default" : "secondary"} className="text-[10px]">
+                        {h.ativo ? "Ativo" : "Inativo"}
+                      </Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-xs text-muted-foreground">{h.cidade}, {h.estado}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{count} profissional(is) vinculado(s)</p>
+                  </CardContent>
+                </Card>
               );
             })}
           </div>
         </TabsContent>
-      </Tabs>
-    </div>
-  );
-}
 
-/* ---- Hospital Card with Setores ---- */
-
-function HospitalCard({ hospital: h, profissionaisCount, setores: hospitalSetores, hospitals, onUpdated }: {
-  hospital: Hospital; profissionaisCount: number; setores: Setor[]; hospitals: Hospital[]; onUpdated: () => void;
-}) {
-  const [expanded, setExpanded] = useState(false);
-
-  return (
-    <Collapsible open={expanded} onOpenChange={setExpanded}>
-      <Card className={!h.ativo ? "opacity-50" : ""}>
-        <CollapsibleTrigger asChild>
-          <CardHeader className="pb-2 cursor-pointer hover:bg-muted/30 transition-colors rounded-t-lg">
-            <CardTitle className="text-sm flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-muted-foreground" />
-                <span>{h.nome}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="text-[10px]">
-                  {hospitalSetores.length} setor(es)
-                </Badge>
-                <Badge variant={h.ativo ? "default" : "secondary"} className="text-[10px]">
-                  {h.ativo ? "Ativo" : "Inativo"}
-                </Badge>
-                <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${expanded ? "rotate-180" : ""}`} />
-              </div>
-            </CardTitle>
-          </CardHeader>
-        </CollapsibleTrigger>
-        <CardContent className="pb-2">
-          <p className="text-xs text-muted-foreground">{h.cidade}, {h.estado}</p>
-          <p className="text-xs text-muted-foreground mt-1">{profissionaisCount} profissional(is) vinculado(s)</p>
-        </CardContent>
-        <CollapsibleContent>
-          <div className="border-t px-4 py-3 space-y-3">
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-medium text-foreground">Setores</p>
-              <CreateSetorDialog hospitals={[h]} onCreated={onUpdated} singleHospital />
-            </div>
-            {hospitalSetores.length === 0 ? (
-              <p className="text-xs text-muted-foreground py-2">Nenhum setor cadastrado neste hospital.</p>
-            ) : (
+        {/* PERMISSIONS TAB */}
+        <TabsContent value="permissions" className="space-y-4">
+          <div className="flex justify-end">
+            <LinkUserDialog hospitals={hospitals} profiles={profiles} onCreated={fetchData} />
+          </div>
+          <Card>
+            <CardContent className="p-0">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-xs">Setor</TableHead>
-                    <TableHead className="text-xs">Leitos</TableHead>
+                    <TableHead className="text-xs">Profissional</TableHead>
+                    <TableHead className="text-xs">Hospital</TableHead>
+                    <TableHead className="text-xs">Papel</TableHead>
                     <TableHead className="text-xs">Status</TableHead>
                     <TableHead className="text-xs">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {hospitalSetores.map((s) => (
-                    <TableRow key={s.id}>
-                      <TableCell className="text-xs font-medium">{s.nome}</TableCell>
-                      <TableCell className="text-xs">{s.numero_leitos}</TableCell>
+                  {links.map((l) => (
+                    <TableRow key={l.id}>
+                      <TableCell className="text-xs font-medium">{l.profile?.nome || "—"}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{l.hospital?.nome || "—"}</TableCell>
                       <TableCell>
-                        <Badge variant={s.ativo ? "default" : "secondary"} className="text-[10px]">
-                          {s.ativo ? "Ativo" : "Inativo"}
+                        <Badge variant="outline" className="text-[10px] capitalize">
+                          {ROLES.find(r => r.value === l.role)?.label || l.role}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <ToggleSetorButton setor={s} onUpdated={onUpdated} />
+                        <Badge variant={l.ativo ? "default" : "secondary"} className="text-[10px]">
+                          {l.ativo ? "Ativo" : "Inativo"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <UpdateLinkActions link={l} onUpdated={fetchData} />
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
-            )}
-          </div>
-        </CollapsibleContent>
-      </Card>
-    </Collapsible>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 }
 
@@ -530,99 +497,6 @@ function UpdateLinkActions({ link, onUpdated }: { link: UserHospitalLink; onUpda
       disabled={submitting}
     >
       {link.ativo ? "Desativar" : "Reativar"}
-    </Button>
-  );
-}
-
-function CreateSetorDialog({ hospitals, onCreated, singleHospital }: { hospitals: Hospital[]; onCreated: () => void; singleHospital?: boolean }) {
-  const [open, setOpen] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const defaultHospitalId = singleHospital && hospitals.length === 1 ? hospitals[0].id : "";
-  const [form, setForm] = useState({ hospital_id: defaultHospitalId, nome: "", numero_leitos: "" });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitting(true);
-    try {
-      const { error } = await supabase.from("setores").insert({
-        hospital_id: form.hospital_id || defaultHospitalId,
-        nome: form.nome.trim(),
-        numero_leitos: parseInt(form.numero_leitos) || 0,
-      });
-      if (error) throw error;
-      toast.success("Setor criado com sucesso");
-      setOpen(false);
-      setForm({ hospital_id: defaultHospitalId, nome: "", numero_leitos: "" });
-      onCreated();
-    } catch (err: any) {
-      toast.error(err.message);
-    }
-    setSubmitting(false);
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size="sm" variant="outline" className="gap-1.5 h-7 text-[10px]">
-          <Plus className="w-3 h-3" /> Adicionar Setor
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle className="text-sm">Cadastrar Setor</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-3">
-          {!singleHospital && (
-            <div className="space-y-1.5">
-              <Label className="text-xs">Hospital</Label>
-              <Select value={form.hospital_id} onValueChange={(v) => setForm({ ...form, hospital_id: v })}>
-                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                <SelectContent>
-                  {hospitals.filter(h => h.ativo).map((h) => (
-                    <SelectItem key={h.id} value={h.id}>{h.nome}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label className="text-xs">Nome do Setor</Label>
-              <Input value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} placeholder="Ex: UTI, Enfermaria" required />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs">Nº de Leitos</Label>
-              <Input type="number" min="0" value={form.numero_leitos} onChange={(e) => setForm({ ...form, numero_leitos: e.target.value })} placeholder="0" required />
-            </div>
-          </div>
-          <Button type="submit" className="w-full" disabled={submitting || !(form.hospital_id || defaultHospitalId) || !form.nome.trim()}>
-            {submitting ? "Criando..." : "Criar Setor"}
-          </Button>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function ToggleSetorButton({ setor, onUpdated }: { setor: Setor; onUpdated: () => void }) {
-  const [submitting, setSubmitting] = useState(false);
-
-  const toggle = async () => {
-    setSubmitting(true);
-    try {
-      const { error } = await supabase.from("setores").update({ ativo: !setor.ativo }).eq("id", setor.id);
-      if (error) throw error;
-      toast.success(setor.ativo ? "Setor desativado" : "Setor reativado");
-      onUpdated();
-    } catch (err: any) {
-      toast.error(err.message);
-    }
-    setSubmitting(false);
-  };
-
-  return (
-    <Button variant={setor.ativo ? "ghost" : "outline"} size="sm" className="text-[10px] h-7" onClick={toggle} disabled={submitting}>
-      {setor.ativo ? "Desativar" : "Reativar"}
     </Button>
   );
 }
