@@ -431,16 +431,28 @@ export function AdmissaoSheet() {
                   <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Internação</p>
 
                   <div className="grid grid-cols-2 gap-3">
-                    <FormField control={form.control} name="leito" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">Leito</FormLabel>
-                        <FormControl><Input placeholder="Ex: UTI-01" {...field} /></FormControl>
-                      </FormItem>
-                    )} />
                     <FormField control={form.control} name="setor" render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-xs">Setor</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value || ""}>
+                        <Select
+                          onValueChange={async (val) => {
+                            field.onChange(val);
+                            // Auto-generate bed label
+                            const setor = setoresHospital.find(s => s.nome === val);
+                            if (setor && currentHospital) {
+                              const { count } = await supabase
+                                .from("internacoes")
+                                .select("*", { count: "exact", head: true })
+                                .eq("hospital_id", currentHospital.hospital_id)
+                                .eq("setor", val)
+                                .in("status", ["internado", "uti"]);
+                              const abbrev = sectorAbbrev(val);
+                              const nextBed = bedLabel(abbrev, count || 0);
+                              form.setValue("leito", nextBed);
+                            }
+                          }}
+                          value={field.value || ""}
+                        >
                           <FormControl>
                             <SelectTrigger className="text-xs h-9">
                               <SelectValue placeholder="Selecione o setor" />
@@ -454,6 +466,12 @@ export function AdmissaoSheet() {
                             ))}
                           </SelectContent>
                         </Select>
+                      </FormItem>
+                    )} />
+                    <FormField control={form.control} name="leito" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs">Leito (auto)</FormLabel>
+                        <FormControl><Input readOnly className="text-xs h-9 bg-muted" placeholder="Selecione o setor" {...field} /></FormControl>
                       </FormItem>
                     )} />
                   </div>
