@@ -97,7 +97,8 @@ export default function Patients() {
           <div className="flex flex-col gap-1">
             <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Setor</label>
             <select value={sectorFilter} onChange={(e) => setSectorFilter(e.target.value)} className="clinical-input !w-auto !py-1.5 text-xs">
-              {setores.map((s) => <option key={s} value={s}>{s}</option>)}
+              <option value="Todos">Todos</option>
+              {setores.map((s) => <option key={s.id} value={s.nome}>{s.nome}</option>)}
             </select>
           </div>
           <div className="flex flex-col gap-1">
