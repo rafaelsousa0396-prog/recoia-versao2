@@ -69,7 +69,7 @@ export default function Patients() {
           />
         </div>
         <div className="flex gap-3 items-end flex-wrap">
-          <Filter className="w-3.5 h-3.5 text-muted-foreground mb-2" />
+          
           <div className="flex flex-col gap-1">
             <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Setor</label>
             <select value={sectorFilter} onChange={(e) => setSectorFilter(e.target.value)} className="clinical-input !w-auto !py-1.5 text-xs">
