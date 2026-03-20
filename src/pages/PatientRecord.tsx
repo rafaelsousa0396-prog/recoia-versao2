@@ -227,6 +227,7 @@ function EvolutionTab({ patient }: { patient: typeof patients[0] }) {
   }, {});
 
   const sortedDates = Object.keys(evolutionsByDate).sort((a, b) => b.localeCompare(a));
+  const [openEvoDates, setOpenEvoDates] = useState<string[]>(() => sortedDates.length > 0 ? [sortedDates[0]] : []);
 
   const evoRoles = ["Todos", ...Array.from(new Set(evolutions.map((e) => e.role)))];
 
