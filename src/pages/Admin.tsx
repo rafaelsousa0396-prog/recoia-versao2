@@ -51,6 +51,7 @@ export default function Admin() {
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [links, setLinks] = useState<UserHospitalLink[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [setores, setSetores] = useState<Setor[]>([]);
   const [searchUsers, setSearchUsers] = useState("");
   const [loading, setLoading] = useState(true);
 
