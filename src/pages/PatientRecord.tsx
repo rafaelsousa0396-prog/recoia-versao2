@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { patients, evolutions, exams, prescriptions } from "@/data/mockData";
-import { SparkLine } from "@/components/SparkLine";
+
 
 const tabs = [
   { label: "Resumo", path: "", icon: ClipboardList },
@@ -752,7 +752,11 @@ function VitalsTab({ patient }: { patient: typeof patients[0] }) {
               <p className={`vital-value text-3xl ${v.danger ? "text-risk-high" : "text-foreground"}`}>
                 {v.value} <span className="text-sm text-muted-foreground font-sans">{v.unit}</span>
               </p>
-              {v.data && <SparkLine data={v.data} color={v.danger ? "hsl(0, 72%, 51%)" : "hsl(200, 80%, 45%)"} width={120} height={40} />}
+              {v.data && (
+                <span className={`text-xs font-mono ${v.danger ? "text-risk-high" : "text-muted-foreground"}`}>
+                  {Math.min(...v.data)}–{Math.max(...v.data)}
+                </span>
+              )}
             </div>
             {v.data && (
               <div className="mt-3 flex gap-2 text-[10px] text-muted-foreground">
@@ -782,7 +786,11 @@ function VitalCard({ icon: Icon, label, value, unit, data, danger }: {
           <Icon className={`w-3.5 h-3.5 ${danger ? "text-risk-high" : "text-muted-foreground"}`} />
           <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</span>
         </div>
-        {data && <SparkLine data={data} color={danger ? "hsl(0, 72%, 51%)" : "hsl(200, 80%, 45%)"} width={60} height={20} />}
+        {data && (
+          <span className={`text-[10px] font-mono ${danger ? "text-risk-high" : "text-muted-foreground"}`}>
+            {Math.min(...data)}–{Math.max(...data)}
+          </span>
+        )}
       </div>
       <p className={`vital-value mt-1 ${danger ? "text-risk-high" : "text-foreground"}`}>
         {value} <span className="text-xs text-muted-foreground font-sans">{unit}</span>
