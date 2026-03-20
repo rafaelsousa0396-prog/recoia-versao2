@@ -101,8 +101,8 @@ function SummaryTab({ patient }: { patient: typeof patients[0] }) {
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <VitalCard icon={Heart} label="FC" value={`${patient.vitals.fc[patient.vitals.fc.length - 1]}`} unit="bpm" data={patient.vitals.fc} danger={patient.vitals.fc[patient.vitals.fc.length - 1] > 100} />
         <VitalCard icon={Droplets} label="SpO₂" value={`${patient.vitals.satO2[patient.vitals.satO2.length - 1]}`} unit="%" data={patient.vitals.satO2} danger={patient.vitals.satO2[patient.vitals.satO2.length - 1] < 92} />
-        <VitalCard icon={Activity} label="PA" value={patient.vitals.pa} unit="mmHg" />
-        <VitalCard icon={Thermometer} label="Temp" value={`${patient.vitals.temp}`} unit="°C" danger={patient.vitals.temp > 37.5} />
+        <VitalCard icon={Activity} label="PA" value={patient.vitals.pa[patient.vitals.pa.length - 1]} unit="mmHg" data={patient.vitals.pa} />
+        <VitalCard icon={Thermometer} label="Temp" value={`${patient.vitals.temp[patient.vitals.temp.length - 1]}`} unit="°C" data={patient.vitals.temp} danger={patient.vitals.temp[patient.vitals.temp.length - 1] > 37.5} />
       </motion.div>
 
       {/* Alerts */}
@@ -718,11 +718,11 @@ function ExamsTab() {
 
 /* ============ VITALS TAB ============ */
 function VitalsTab({ patient }: { patient: typeof patients[0] }) {
-  const vitalsData = [
+  const vitalsData: { icon: React.ElementType; label: string; value: string | number; unit: string; data: (number | string)[]; danger: boolean }[] = [
     { icon: Heart, label: "Frequência Cardíaca", value: patient.vitals.fc[patient.vitals.fc.length - 1], unit: "bpm", data: patient.vitals.fc, danger: patient.vitals.fc[patient.vitals.fc.length - 1] > 100 },
     { icon: Droplets, label: "Saturação O₂", value: patient.vitals.satO2[patient.vitals.satO2.length - 1], unit: "%", data: patient.vitals.satO2, danger: patient.vitals.satO2[patient.vitals.satO2.length - 1] < 92 },
-    { icon: Activity, label: "Pressão Arterial", value: patient.vitals.pa, unit: "mmHg", data: undefined, danger: false },
-    { icon: Thermometer, label: "Temperatura", value: patient.vitals.temp, unit: "°C", data: undefined, danger: patient.vitals.temp > 37.5 },
+    { icon: Activity, label: "Pressão Arterial", value: patient.vitals.pa[patient.vitals.pa.length - 1], unit: "mmHg", data: patient.vitals.pa, danger: false },
+    { icon: Thermometer, label: "Temperatura", value: patient.vitals.temp[patient.vitals.temp.length - 1], unit: "°C", data: patient.vitals.temp, danger: patient.vitals.temp[patient.vitals.temp.length - 1] > 37.5 },
   ];
 
   return (
@@ -754,7 +754,9 @@ function VitalsTab({ patient }: { patient: typeof patients[0] }) {
               </p>
               {v.data && (
                 <span className={`text-xs font-mono ${v.danger ? "text-risk-high" : "text-muted-foreground"}`}>
-                  {Math.min(...v.data)}–{Math.max(...v.data)}
+                  {typeof v.data[0] === "number"
+                    ? `${Math.min(...(v.data as number[]))}–${Math.max(...(v.data as number[]))}`
+                    : `${v.data[0]}…${v.data[v.data.length - 1]}`}
                 </span>
               )}
             </div>
@@ -777,8 +779,14 @@ function VitalsTab({ patient }: { patient: typeof patients[0] }) {
 
 /* ============ SHARED COMPONENTS ============ */
 function VitalCard({ icon: Icon, label, value, unit, data, danger }: {
-  icon: React.ElementType; label: string; value: string; unit: string; data?: number[]; danger?: boolean;
+  icon: React.ElementType; label: string; value: string; unit: string; data?: (number | string)[]; danger?: boolean;
 }) {
+  const minMax = data && data.length > 0
+    ? typeof data[0] === "number"
+      ? `${Math.min(...(data as number[]))}–${Math.max(...(data as number[]))}`
+      : `${data[0]}…${data[data.length - 1]}`
+    : null;
+
   return (
     <div className={`bg-card border rounded-xl p-3 clinical-shadow ${danger ? "border-risk-high/30" : ""}`}>
       <div className="flex items-center justify-between">
@@ -786,9 +794,9 @@ function VitalCard({ icon: Icon, label, value, unit, data, danger }: {
           <Icon className={`w-3.5 h-3.5 ${danger ? "text-risk-high" : "text-muted-foreground"}`} />
           <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</span>
         </div>
-        {data && (
+        {minMax && (
           <span className={`text-[10px] font-mono ${danger ? "text-risk-high" : "text-muted-foreground"}`}>
-            {Math.min(...data)}–{Math.max(...data)}
+            {minMax}
           </span>
         )}
       </div>

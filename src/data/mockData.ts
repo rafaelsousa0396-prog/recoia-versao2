@@ -15,8 +15,8 @@ export interface Patient {
   vitals: {
     fc: number[];
     satO2: number[];
-    pa: string;
-    temp: number;
+    pa: string[];
+    temp: number[];
   };
   alerts: string[];
 }
@@ -76,7 +76,7 @@ export const patients: Patient[] = [
     admissionDate: "2026-03-15",
     risk: "high",
     status: "uti",
-    vitals: { fc: [98, 102, 110, 105, 112, 108], satO2: [91, 89, 88, 90, 87, 89], pa: "90/60", temp: 38.7 },
+    vitals: { fc: [98, 102, 110, 105, 112, 108], satO2: [91, 89, 88, 90, 87, 89], pa: ["90/60", "88/58", "92/62", "90/60", "95/65", "90/60"], temp: [38.7, 38.5, 38.9, 39.0, 38.6, 38.7] },
     alerts: ["NEWS 2: 7 pontos - Risco de deterioração", "Lactato elevado: 4.2 mmol/L"],
   },
   {
@@ -93,7 +93,7 @@ export const patients: Patient[] = [
     admissionDate: "2026-03-16",
     risk: "stable",
     status: "internado",
-    vitals: { fc: [72, 75, 70, 74, 71, 73], satO2: [97, 98, 97, 98, 97, 98], pa: "120/80", temp: 36.5 },
+    vitals: { fc: [72, 75, 70, 74, 71, 73], satO2: [97, 98, 97, 98, 97, 98], pa: ["120/80", "118/78", "122/82", "120/80", "119/79", "120/80"], temp: [36.5, 36.4, 36.6, 36.5, 36.5, 36.4] },
     alerts: [],
   },
   {
@@ -110,7 +110,7 @@ export const patients: Patient[] = [
     admissionDate: "2026-03-14",
     risk: "high",
     status: "uti",
-    vitals: { fc: [88, 95, 92, 100, 96, 94], satO2: [92, 90, 91, 89, 90, 91], pa: "100/65", temp: 36.8 },
+    vitals: { fc: [88, 95, 92, 100, 96, 94], satO2: [92, 90, 91, 89, 90, 91], pa: ["100/65", "98/60", "105/68", "100/65", "102/66", "100/65"], temp: [36.8, 36.7, 36.9, 36.8, 36.8, 36.7] },
     alerts: ["Troponina em elevação", "BNP > 2000 pg/mL"],
   },
   {
@@ -127,7 +127,7 @@ export const patients: Patient[] = [
     admissionDate: "2026-03-17",
     risk: "stable",
     status: "internado",
-    vitals: { fc: [80, 78, 82, 79, 81, 80], satO2: [98, 99, 98, 99, 98, 99], pa: "115/75", temp: 36.4 },
+    vitals: { fc: [80, 78, 82, 79, 81, 80], satO2: [98, 99, 98, 99, 98, 99], pa: ["115/75", "114/74", "116/76", "115/75", "115/75", "114/74"], temp: [36.4, 36.3, 36.5, 36.4, 36.4, 36.3] },
     alerts: [],
   },
   {
@@ -144,7 +144,7 @@ export const patients: Patient[] = [
     admissionDate: "2026-03-18",
     risk: "high",
     status: "internado",
-    vitals: { fc: [65, 68, 70, 66, 72, 69], satO2: [95, 94, 93, 94, 93, 94], pa: "180/100", temp: 36.9 },
+    vitals: { fc: [65, 68, 70, 66, 72, 69], satO2: [95, 94, 93, 94, 93, 94], pa: ["180/100", "175/98", "185/105", "180/100", "178/99", "180/100"], temp: [36.9, 36.8, 37.0, 36.9, 36.9, 36.8] },
     alerts: ["PA elevada persistente", "Janela terapêutica trombolítico: 2h restantes"],
   },
   {
@@ -161,7 +161,7 @@ export const patients: Patient[] = [
     admissionDate: "2026-03-13",
     risk: "medium",
     status: "internado",
-    vitals: { fc: [85, 88, 84, 86, 87, 85], satO2: [95, 96, 95, 96, 95, 96], pa: "135/85", temp: 37.1 },
+    vitals: { fc: [85, 88, 84, 86, 87, 85], satO2: [95, 96, 95, 96, 95, 96], pa: ["135/85", "132/83", "138/88", "135/85", "134/84", "135/85"], temp: [37.1, 37.0, 37.2, 37.1, 37.1, 37.0] },
     alerts: ["Risco de TEP - profilaxia em andamento"],
   },
 ];
