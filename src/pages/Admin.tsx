@@ -595,7 +595,7 @@ function CreateSetorDialog({ hospitals, onCreated, singleHospital }: { hospitals
               <Input type="number" min="0" value={form.numero_leitos} onChange={(e) => setForm({ ...form, numero_leitos: e.target.value })} placeholder="0" required />
             </div>
           </div>
-          <Button type="submit" className="w-full" disabled={submitting || !form.hospital_id || !form.nome.trim()}>
+          <Button type="submit" className="w-full" disabled={submitting || !(form.hospital_id || defaultHospitalId) || !form.nome.trim()}>
             {submitting ? "Criando..." : "Criar Setor"}
           </Button>
         </form>
