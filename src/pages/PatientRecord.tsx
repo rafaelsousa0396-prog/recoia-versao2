@@ -786,7 +786,11 @@ function VitalCard({ icon: Icon, label, value, unit, data, danger }: {
           <Icon className={`w-3.5 h-3.5 ${danger ? "text-risk-high" : "text-muted-foreground"}`} />
           <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</span>
         </div>
-        {data && <SparkLine data={data} color={danger ? "hsl(0, 72%, 51%)" : "hsl(200, 80%, 45%)"} width={60} height={20} />}
+        {data && (
+          <span className={`text-[10px] font-mono ${danger ? "text-risk-high" : "text-muted-foreground"}`}>
+            {Math.min(...data)}–{Math.max(...data)}
+          </span>
+        )}
       </div>
       <p className={`vital-value mt-1 ${danger ? "text-risk-high" : "text-foreground"}`}>
         {value} <span className="text-xs text-muted-foreground font-sans">{unit}</span>
