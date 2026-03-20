@@ -196,12 +196,23 @@ function PlaceholderSection({ title, message }: { title: string; message: string
 }
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-evolution`;
-const roles = ["Médico", "Enfermagem", "Fisioterapia", "Assistente Social", "Psicologia", "Fonoaudiologia", "Farmácia"];
+
+const roleDisplayMap: Record<string, string> = {
+  medico: "Médico",
+  enfermagem: "Enfermagem",
+  fisio: "Fisioterapia",
+  assistente_social: "Assistente Social",
+  farmacia: "Farmácia",
+  admin: "Administrador",
+  super_admin: "Administrador",
+  recepcao: "Recepção",
+};
 
 function EvolutionTab({ internacaoId, paciente, internacao }: { internacaoId: string; paciente: any; internacao: any }) {
   const { data: evolucoes = [], isLoading } = useEvolucoes(internacaoId);
   const createEvolucao = useCreateEvolucao();
-  const [selectedRole, setSelectedRole] = useState(roles[0]);
+  const { currentRole } = useAuth();
+  const userRoleDisplay = roleDisplayMap[currentRole || "medico"] || "Médico";
   const [inputText, setInputText] = useState("");
   const [generatedText, setGeneratedText] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
