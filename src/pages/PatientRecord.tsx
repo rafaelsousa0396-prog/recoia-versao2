@@ -721,8 +721,8 @@ function VitalsTab({ patient }: { patient: typeof patients[0] }) {
   const vitalsData = [
     { icon: Heart, label: "Frequência Cardíaca", value: patient.vitals.fc[patient.vitals.fc.length - 1], unit: "bpm", data: patient.vitals.fc, danger: patient.vitals.fc[patient.vitals.fc.length - 1] > 100 },
     { icon: Droplets, label: "Saturação O₂", value: patient.vitals.satO2[patient.vitals.satO2.length - 1], unit: "%", data: patient.vitals.satO2, danger: patient.vitals.satO2[patient.vitals.satO2.length - 1] < 92 },
-    { icon: Activity, label: "Pressão Arterial", value: patient.vitals.pa, unit: "mmHg", data: undefined, danger: false },
-    { icon: Thermometer, label: "Temperatura", value: patient.vitals.temp, unit: "°C", data: undefined, danger: patient.vitals.temp > 37.5 },
+    { icon: Activity, label: "Pressão Arterial", value: patient.vitals.pa[patient.vitals.pa.length - 1], unit: "mmHg", data: patient.vitals.pa, danger: false },
+    { icon: Thermometer, label: "Temperatura", value: patient.vitals.temp[patient.vitals.temp.length - 1], unit: "°C", data: patient.vitals.temp, danger: patient.vitals.temp[patient.vitals.temp.length - 1] > 37.5 },
   ];
 
   return (
