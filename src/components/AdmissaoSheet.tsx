@@ -438,18 +438,20 @@ export function AdmissaoSheet() {
                         <Select
                           onValueChange={async (val) => {
                             field.onChange(val);
-                            // Auto-generate bed label
+                            form.setValue("leito", "");
+                            setAvailableBeds([]);
                             const setor = setoresHospital.find(s => s.nome === val);
                             if (setor && currentHospital) {
-                              const { count } = await supabase
+                              const abbrev = sectorAbbrev(val);
+                              const allBeds = Array.from({ length: setor.numero_leitos }, (_, i) => bedLabel(abbrev, i));
+                              const { data: occupied } = await supabase
                                 .from("internacoes")
-                                .select("*", { count: "exact", head: true })
+                                .select("leito")
                                 .eq("hospital_id", currentHospital.hospital_id)
                                 .eq("setor", val)
                                 .in("status", ["internado", "uti"]);
-                              const abbrev = sectorAbbrev(val);
-                              const nextBed = bedLabel(abbrev, count || 0);
-                              form.setValue("leito", nextBed);
+                              const occupiedSet = new Set((occupied || []).map(r => r.leito));
+                              setAvailableBeds(allBeds.filter(b => !occupiedSet.has(b)));
                             }
                           }}
                           value={field.value || ""}
@@ -471,8 +473,21 @@ export function AdmissaoSheet() {
                     )} />
                     <FormField control={form.control} name="leito" render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs">Leito (auto)</FormLabel>
-                        <FormControl><Input readOnly className="text-xs h-9 bg-muted" placeholder="Selecione o setor" {...field} /></FormControl>
+                        <FormLabel className="text-xs">Leito</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value || ""} disabled={availableBeds.length === 0}>
+                          <FormControl>
+                            <SelectTrigger className="text-xs h-9">
+                              <SelectValue placeholder={form.watch("setor") ? (availableBeds.length === 0 ? "Setor lotado" : "Selecione o leito") : "Selecione o setor"} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {availableBeds.map((bed) => (
+                              <SelectItem key={bed} value={bed} className="text-xs font-mono">
+                                {bed}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </FormItem>
                     )} />
                   </div>
