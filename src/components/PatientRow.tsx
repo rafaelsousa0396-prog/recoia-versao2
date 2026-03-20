@@ -29,14 +29,18 @@ export function PatientRow({ patient, index }: { patient: Patient; index: number
         <span className={riskClasses[patient.risk]}>{riskLabels[patient.risk]}</span>
       </td>
       <td className="px-4 py-3">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 text-[11px]">
           <div className="flex items-center gap-1">
-            <span className="text-[10px] text-muted-foreground">FC</span>
-            <SparkLine data={patient.vitals.fc} color={patient.risk === "high" ? "hsl(0, 72%, 51%)" : "hsl(200, 80%, 45%)"} />
+            <span className="text-muted-foreground">FC</span>
+            <span className={`font-mono ${patient.risk === "high" ? "text-destructive" : "text-foreground"}`}>
+              {Math.min(...patient.vitals.fc)}–{Math.max(...patient.vitals.fc)}
+            </span>
           </div>
           <div className="flex items-center gap-1">
-            <span className="text-[10px] text-muted-foreground">SpO₂</span>
-            <SparkLine data={patient.vitals.satO2} color={patient.vitals.satO2[patient.vitals.satO2.length - 1] < 92 ? "hsl(0, 72%, 51%)" : "hsl(150, 50%, 50%)"} />
+            <span className="text-muted-foreground">SpO₂</span>
+            <span className={`font-mono ${patient.vitals.satO2[patient.vitals.satO2.length - 1] < 92 ? "text-destructive" : "text-foreground"}`}>
+              {Math.min(...patient.vitals.satO2)}–{Math.max(...patient.vitals.satO2)}
+            </span>
           </div>
         </div>
       </td>
