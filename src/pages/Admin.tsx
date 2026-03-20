@@ -112,6 +112,9 @@ export default function Admin() {
           <TabsTrigger value="permissions" className="gap-1.5">
             <Shield className="w-3.5 h-3.5" /> Vínculos
           </TabsTrigger>
+          <TabsTrigger value="setores" className="gap-1.5">
+            <LayoutGrid className="w-3.5 h-3.5" /> Setores
+          </TabsTrigger>
         </TabsList>
 
         {/* USERS TAB */}
