@@ -562,3 +562,93 @@ function UpdateLinkActions({ link, onUpdated }: { link: UserHospitalLink; onUpda
     </Button>
   );
 }
+
+function CreateSetorDialog({ hospitals, onCreated }: { hospitals: Hospital[]; onCreated: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({ hospital_id: "", nome: "", numero_leitos: "" });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.from("setores").insert({
+        hospital_id: form.hospital_id,
+        nome: form.nome.trim(),
+        numero_leitos: parseInt(form.numero_leitos) || 0,
+      });
+      if (error) throw error;
+      toast.success("Setor criado com sucesso");
+      setOpen(false);
+      setForm({ hospital_id: "", nome: "", numero_leitos: "" });
+      onCreated();
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+    setSubmitting(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" className="gap-1.5">
+          <Plus className="w-3.5 h-3.5" /> Novo Setor
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="text-sm">Cadastrar Setor</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div className="space-y-1.5">
+            <Label className="text-xs">Hospital</Label>
+            <Select value={form.hospital_id} onValueChange={(v) => setForm({ ...form, hospital_id: v })}>
+              <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <SelectContent>
+                {hospitals.filter(h => h.ativo).map((h) => (
+                  <SelectItem key={h.id} value={h.id}>{h.nome}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs">Nome do Setor</Label>
+              <Input value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} placeholder="Ex: UTI, Enfermaria" required />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Nº de Leitos</Label>
+              <Input type="number" min="0" value={form.numero_leitos} onChange={(e) => setForm({ ...form, numero_leitos: e.target.value })} placeholder="0" required />
+            </div>
+          </div>
+          <Button type="submit" className="w-full" disabled={submitting || !form.hospital_id || !form.nome.trim()}>
+            {submitting ? "Criando..." : "Criar Setor"}
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ToggleSetorButton({ setor, onUpdated }: { setor: Setor; onUpdated: () => void }) {
+  const [submitting, setSubmitting] = useState(false);
+
+  const toggle = async () => {
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.from("setores").update({ ativo: !setor.ativo }).eq("id", setor.id);
+      if (error) throw error;
+      toast.success(setor.ativo ? "Setor desativado" : "Setor reativado");
+      onUpdated();
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+    setSubmitting(false);
+  };
+
+  return (
+    <Button variant={setor.ativo ? "ghost" : "outline"} size="sm" className="text-[10px] h-7" onClick={toggle} disabled={submitting}>
+      {setor.ativo ? "Desativar" : "Reativar"}
+    </Button>
+  );
+}
