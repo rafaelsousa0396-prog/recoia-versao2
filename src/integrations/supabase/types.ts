@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      evolucoes: {
+        Row: {
+          conteudo: string
+          created_at: string
+          gerado_por_ia: boolean
+          id: string
+          input_ia: string | null
+          internacao_id: string
+          profissional_id: string
+          profissional_nome: string
+          profissional_role: string
+        }
+        Insert: {
+          conteudo: string
+          created_at?: string
+          gerado_por_ia?: boolean
+          id?: string
+          input_ia?: string | null
+          internacao_id: string
+          profissional_id: string
+          profissional_nome: string
+          profissional_role?: string
+        }
+        Update: {
+          conteudo?: string
+          created_at?: string
+          gerado_por_ia?: boolean
+          id?: string
+          input_ia?: string | null
+          internacao_id?: string
+          profissional_id?: string
+          profissional_nome?: string
+          profissional_role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evolucoes_internacao_id_fkey"
+            columns: ["internacao_id"]
+            isOneToOne: false
+            referencedRelation: "internacoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evolucoes_profissional_id_fkey"
+            columns: ["profissional_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hospitals: {
         Row: {
           ativo: boolean
