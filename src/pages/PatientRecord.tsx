@@ -1,16 +1,13 @@
 import React, { useState, useMemo } from "react";
-import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Heart, Droplets, Thermometer, Activity, Brain, FileText, ClipboardList, Pill, Clock, AlertTriangle, CheckCircle2 as Check2, Calendar, User, ChevronDown, ChevronRight } from "lucide-react";
-import { differenceInDays, format, parseISO } from "date-fns";
+import { differenceInDays, differenceInYears, format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { motion, AnimatePresence } from "framer-motion";
-import { DayPicker } from "react-day-picker";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { patients, evolutions, exams, prescriptions } from "@/data/mockData";
-
+import { useInternacao } from "@/hooks/usePacientes";
 
 const tabs = [
   { label: "Resumo", path: "", icon: ClipboardList },
@@ -20,24 +17,36 @@ const tabs = [
   { label: "Sinais Vitais", path: "/vitais", icon: Activity },
 ];
 
+const riskLabelsMap: Record<string, string> = { alto: "Alto", moderado: "Moderado", estavel: "Estável" };
+const riskClasses: Record<string, string> = { alto: "risk-badge-high", moderado: "risk-badge-medium", estavel: "risk-badge-stable" };
+
 export default function PatientRecord() {
   const { id, "*": subPath } = useParams();
   const navigate = useNavigate();
-  const patient = patients.find((p) => p.id === id);
+  const { data: internacao, isLoading } = useInternacao(id);
 
-  if (!patient) {
+  if (isLoading) {
     return (
       <div className="p-6 text-center text-muted-foreground">
-        <p>Paciente não encontrado.</p>
-        <button onClick={() => navigate("/")} className="text-primary text-sm mt-2 underline">Voltar</button>
+        <p className="text-sm">Carregando prontuário...</p>
       </div>
     );
   }
 
+  if (!internacao) {
+    return (
+      <div className="p-6 text-center text-muted-foreground">
+        <p>Paciente não encontrado.</p>
+        <button onClick={() => navigate("/pacientes")} className="text-primary text-sm mt-2 underline">Voltar</button>
+      </div>
+    );
+  }
+
+  const paciente = (internacao as any).paciente;
+  const medicoNome = (internacao as any).medico_responsavel?.nome;
   const currentTab = subPath || "";
-  const riskLabels = { high: "Alto", medium: "Moderado", stable: "Estável" };
-  const riskClasses = { high: "risk-badge-high", medium: "risk-badge-medium", stable: "risk-badge-stable" };
-  const stayDays = differenceInDays(new Date(), parseISO(patient.admissionDate));
+  const stayDays = differenceInDays(new Date(), parseISO(internacao.data_admissao));
+  const age = differenceInYears(new Date(), new Date(paciente.data_nascimento));
 
   return (
     <div className="p-6 max-w-[1400px] mx-auto space-y-6">
@@ -48,18 +57,25 @@ export default function PatientRecord() {
         </button>
         <div className="flex-1">
           <div className="flex items-center gap-3">
-            <h1 className="text-lg font-semibold text-foreground">{patient.name}</h1>
-            <span className="text-xs text-muted-foreground font-normal">Leito {patient.bed} · {patient.sector}</span>
-            <span className={riskClasses[patient.risk]}>{riskLabels[patient.risk]}</span>
+            <h1 className="text-lg font-semibold text-foreground">{paciente.nome}</h1>
+            <span className="text-xs text-muted-foreground font-normal">
+              {internacao.leito ? `Leito ${internacao.leito}` : "Sem leito"} · {internacao.setor || "Sem setor"}
+            </span>
+            <span className={riskClasses[internacao.risco] || ""}>{riskLabelsMap[internacao.risco] || internacao.risco}</span>
           </div>
           <p className="text-xs text-muted-foreground">
-            {patient.age} anos · Nasc. {format(parseISO(patient.birthDate), "dd/MM/yyyy")} · {patient.gender === "M" ? "Masculino" : "Feminino"} · Mãe: {patient.motherName} · Internação {format(parseISO(patient.admissionDate), "dd/MM/yyyy")} ({stayDays} {stayDays === 1 ? "dia" : "dias"}) · {patient.diagnosis}
+            {age} anos · Nasc. {format(new Date(paciente.data_nascimento), "dd/MM/yyyy")} · {paciente.sexo === "M" ? "Masculino" : "Feminino"}
+            {paciente.nome_mae ? ` · Mãe: ${paciente.nome_mae}` : ""}
+            {" "}· Internação {format(parseISO(internacao.data_admissao), "dd/MM/yyyy")} ({stayDays} {stayDays === 1 ? "dia" : "dias"})
+            {internacao.diagnostico ? ` · ${internacao.diagnostico}` : ""}
           </p>
         </div>
-        <div className="text-right">
-          <p className="text-xs text-muted-foreground">Médico responsável</p>
-          <p className="text-sm font-medium">{patient.doctor}</p>
-        </div>
+        {medicoNome && (
+          <div className="text-right">
+            <p className="text-xs text-muted-foreground">Médico responsável</p>
+            <p className="text-sm font-medium">{medicoNome}</p>
+          </div>
+        )}
       </motion.div>
 
       {/* Tabs */}
@@ -84,89 +100,93 @@ export default function PatientRecord() {
       </div>
 
       {/* Tab Content */}
-      {currentTab === "" && <SummaryTab patient={patient} />}
-      {currentTab === "evolucao" && <EvolutionTab patient={patient} />}
-      {currentTab === "prescricoes" && <PrescriptionsTab patientId={patient.id} />}
+      {currentTab === "" && <SummaryTab internacao={internacao} paciente={paciente} />}
+      {currentTab === "evolucao" && <EvolutionTab />}
+      {currentTab === "prescricoes" && <PrescriptionsTab />}
       {currentTab === "exames" && <ExamsTab />}
-      {currentTab === "vitais" && <VitalsTab patient={patient} />}
+      {currentTab === "vitais" && <VitalsTab />}
     </div>
   );
 }
 
 /* ============ SUMMARY TAB ============ */
-function SummaryTab({ patient }: { patient: typeof patients[0] }) {
+function SummaryTab({ internacao, paciente }: { internacao: any; paciente: any }) {
+  const age = differenceInYears(new Date(), new Date(paciente.data_nascimento));
+
   return (
     <div className="space-y-6">
-      {/* Vitals Strip */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <VitalCard icon={Heart} label="FC" value={`${patient.vitals.fc[patient.vitals.fc.length - 1]}`} unit="bpm" data={patient.vitals.fc} danger={patient.vitals.fc[patient.vitals.fc.length - 1] > 100} />
-        <VitalCard icon={Droplets} label="SpO₂" value={`${patient.vitals.satO2[patient.vitals.satO2.length - 1]}`} unit="%" data={patient.vitals.satO2} danger={patient.vitals.satO2[patient.vitals.satO2.length - 1] < 92} />
-        <VitalCard icon={Activity} label="PA" value={patient.vitals.pa[patient.vitals.pa.length - 1]} unit="mmHg" data={patient.vitals.pa} />
-        <VitalCard icon={Thermometer} label="Temp" value={`${patient.vitals.temp[patient.vitals.temp.length - 1]}`} unit="°C" data={patient.vitals.temp} danger={patient.vitals.temp[patient.vitals.temp.length - 1] > 37.5} />
+      {/* Patient info cards */}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-card border rounded-xl p-4 clinical-shadow space-y-3">
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Dados Pessoais</h3>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <InfoRow label="Nome" value={paciente.nome} />
+            <InfoRow label="Idade" value={`${age} anos`} />
+            <InfoRow label="Sexo" value={paciente.sexo === "M" ? "Masculino" : "Feminino"} />
+            <InfoRow label="CPF" value={paciente.cpf} />
+            <InfoRow label="Telefone" value={paciente.telefone} />
+            <InfoRow label="Convênio" value={paciente.convenio} />
+            <InfoRow label="Endereço" value={paciente.endereco} />
+            <InfoRow label="Cidade/UF" value={[paciente.cidade, paciente.estado].filter(Boolean).join(" / ") || null} />
+          </div>
+        </div>
+
+        <div className="bg-card border rounded-xl p-4 clinical-shadow space-y-3">
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Dados da Internação</h3>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <InfoRow label="Setor" value={internacao.setor} />
+            <InfoRow label="Leito" value={internacao.leito} />
+            <InfoRow label="Diagnóstico" value={internacao.diagnostico} />
+            <InfoRow label="Status" value={internacao.status} />
+            <InfoRow label="Risco" value={riskLabelsMap[internacao.risco] || internacao.risco} />
+            <InfoRow label="Admissão" value={format(parseISO(internacao.data_admissao), "dd/MM/yyyy")} />
+          </div>
+          {internacao.observacoes && (
+            <div>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Observações</p>
+              <p className="text-sm text-foreground/80">{internacao.observacoes}</p>
+            </div>
+          )}
+        </div>
       </motion.div>
 
-      {/* Alerts */}
-      {patient.alerts.length > 0 && (
-        <div className="bg-risk-high/5 border border-risk-high/20 rounded-xl p-4">
-          <h3 className="text-xs font-semibold text-risk-high uppercase tracking-wider mb-2">Alertas Ativos</h3>
-          <ul className="space-y-1">
-            {patient.alerts.map((a, i) => (
-              <li key={i} className="text-sm text-foreground">• {a}</li>
-            ))}
-          </ul>
-        </div>
+      {paciente.contato_emergencia_nome && (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-card border rounded-xl p-4 clinical-shadow">
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Contato de Emergência</h3>
+          <div className="grid grid-cols-3 gap-2 text-sm">
+            <InfoRow label="Nome" value={paciente.contato_emergencia_nome} />
+            <InfoRow label="Telefone" value={paciente.contato_emergencia_telefone} />
+            <InfoRow label="Parentesco" value={paciente.contato_emergencia_parentesco} />
+          </div>
+        </motion.div>
       )}
 
-      {/* Split View */}
+      {/* Placeholder for future features */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div>
-          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Evoluções</h2>
-          <div className="space-y-3">
-            {evolutions.map((evo) => (
-              <motion.div key={evo.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-card border rounded-xl p-4 clinical-shadow">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-foreground">{evo.professional}</span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">{evo.role}</span>
-                  </div>
-                  <span className="text-[10px] text-muted-foreground">{evo.date} · {evo.time}</span>
-                </div>
-                <p className="text-sm text-foreground/90 leading-relaxed">{evo.content}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
+        <PlaceholderSection title="Evoluções" message="Nenhuma evolução registrada ainda." />
+        <PlaceholderSection title="Exames Laboratoriais" message="Nenhum exame registrado ainda." />
+      </div>
+    </div>
+  );
+}
 
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Exames Laboratoriais</h2>
-            <span className="text-xs text-muted-foreground">Coleta mais recente: <span className="font-medium text-foreground">15/03/2026</span></span>
-          </div>
-          <div className="bg-card border rounded-xl clinical-shadow overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b bg-secondary/50">
-                  <th className="text-left px-4 py-2 text-[10px] font-semibold text-muted-foreground uppercase">Exame</th>
-                  <th className="text-left px-4 py-2 text-[10px] font-semibold text-muted-foreground uppercase">Resultado</th>
-                  <th className="text-left px-4 py-2 text-[10px] font-semibold text-muted-foreground uppercase">Referência</th>
-                  <th className="text-left px-4 py-2 text-[10px] font-semibold text-muted-foreground uppercase">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {exams.map((ex) => (
-                  <tr key={ex.id} className={ex.status === "critical" ? "bg-risk-high/5" : ex.status === "altered" ? "bg-risk-medium/5" : ""}>
-                    <td className="px-4 py-2 text-sm text-foreground">{ex.name}</td>
-                    <td className="px-4 py-2 font-mono text-sm font-medium tracking-tight">
-                      {ex.value} <span className="text-xs text-muted-foreground">{ex.unit}</span>
-                    </td>
-                    <td className="px-4 py-2 text-xs text-muted-foreground">{ex.reference}</td>
-                    <td className="px-4 py-2"><ExamStatus status={ex.status} /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+const riskLabelsMap: Record<string, string> = { alto: "Alto", moderado: "Moderado", estavel: "Estável" };
+
+function InfoRow({ label, value }: { label: string; value: string | null | undefined }) {
+  return (
+    <div>
+      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</p>
+      <p className="text-sm text-foreground">{value || "—"}</p>
+    </div>
+  );
+}
+
+function PlaceholderSection({ title, message }: { title: string; message: string }) {
+  return (
+    <div>
+      <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">{title}</h2>
+      <div className="bg-card border rounded-xl p-6 clinical-shadow text-center">
+        <p className="text-sm text-muted-foreground">{message}</p>
       </div>
     </div>
   );
@@ -174,63 +194,8 @@ function SummaryTab({ patient }: { patient: typeof patients[0] }) {
 
 /* ============ EVOLUTION TAB ============ */
 import { Sparkles, Mic, CheckCircle2 } from "lucide-react";
-// AnimatePresence already imported at top
 
-const roles = ["Médico", "Enfermagem", "Fisioterapia", "Assistente Social", "Psicologia", "Fonoaudiologia", "Farmácia"];
-
-const aiSuggestion = `Paciente no 3º dia de internação em UTI, mantendo quadro séptico de foco pulmonar. Apresenta-se sonolento, responsivo a estímulos verbais. Hemodinamicamente instável em uso de noradrenalina 0.3 mcg/kg/min.
-
-**Exame Físico:**
-- Neurológico: Glasgow 13 (O3V4M6), pupilas isocóricas e fotorreagentes
-- Respiratório: Em VMI, modo PCV, FiO2 60%, PEEP 10. MV diminuído em base D com crepitações bilaterais
-- Cardiovascular: RCR 2T, BNF, sem sopros. PAM 62 mmHg com DVA
-- Abdome: Flácido, RHA presentes, sem sinais de irritação peritoneal
-- Extremidades: Edema 2+/4+ em MMII, perfusão periférica lentificada
-
-**Conduta:**
-1. Escalonar antibioticoterapia para Meropenem conforme antibiograma
-2. Manter drogas vasoativas com meta PAM > 65 mmHg
-3. Controle de lactato em 6h
-4. Manter balanço hídrico neutro — avaliar furosemida se necessário
-5. Solicitar novo hemograma + PCR + procalcitonina em 12h`;
-
-function EvolutionTab({ patient }: { patient: typeof patients[0] }) {
-  const [selectedRole, setSelectedRole] = useState(roles[0]);
-  const [inputText, setInputText] = useState("");
-  const [generatedText, setGeneratedText] = useState("");
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [evoRoleFilter, setEvoRoleFilter] = useState<string>("Todos");
-
-  const handleGenerate = () => {
-    setIsGenerating(true);
-    let i = 0;
-    const text = aiSuggestion;
-    const interval = setInterval(() => {
-      setGeneratedText(text.slice(0, i));
-      i += 3;
-      if (i > text.length) {
-        clearInterval(interval);
-        setGeneratedText(text);
-        setIsGenerating(false);
-      }
-    }, 10);
-  };
-
-  const filteredEvolutions = evolutions.filter((e) =>
-    evoRoleFilter === "Todos" ? true : e.role === evoRoleFilter
-  );
-
-  const evolutionsByDate = filteredEvolutions.reduce<Record<string, typeof evolutions>>((acc, evo) => {
-    if (!acc[evo.date]) acc[evo.date] = [];
-    acc[evo.date].push(evo);
-    return acc;
-  }, {});
-
-  const sortedDates = Object.keys(evolutionsByDate).sort((a, b) => b.localeCompare(a));
-  const [openEvoDates, setOpenEvoDates] = useState<string[]>(() => sortedDates.length > 0 ? [sortedDates[0]] : []);
-
-  const evoRoles = ["Todos", ...Array.from(new Set(evolutions.map((e) => e.role)))];
-
+function EvolutionTab() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2">
@@ -240,577 +205,45 @@ function EvolutionTab({ patient }: { patient: typeof patients[0] }) {
           <p className="text-xs text-muted-foreground">Assistente inteligente para documentação clínica estruturada</p>
         </div>
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Entrada (tópicos ou texto livre)</label>
-            <button className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors">
-              <Mic className="w-3.5 h-3.5" /> Ditar
-            </button>
-          </div>
-          <textarea
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            placeholder="paciente afebril, dreno produtivo 50ml, diurese satisfatória, mantendo conduta..."
-            className="clinical-input !border !border-border rounded-xl !px-4 !py-3 min-h-[200px] resize-none"
-            rows={10}
-          />
-          <div className="mt-3">
-            <Button onClick={handleGenerate} disabled={isGenerating} className="bg-primary text-primary-foreground hover:bg-primary/90">
-              <Sparkles className="w-4 h-4 mr-1.5" />
-              {isGenerating ? "Gerando..." : "Gerar Evolução com IA"}
-            </Button>
-          </div>
-        </div>
-
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Evolução Gerada</label>
-            {generatedText && !isGenerating && (
-              <button className="flex items-center gap-1 text-xs text-status-stable hover:text-status-stable/80 transition-colors">
-                <CheckCircle2 className="w-3.5 h-3.5" /> Assinar e Salvar
-              </button>
-            )}
-          </div>
-          <div className="bg-card border rounded-xl p-4 min-h-[200px] clinical-shadow">
-            <AnimatePresence>
-              {generatedText ? (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-sm leading-relaxed text-foreground/90 whitespace-pre-wrap">
-                  {generatedText}
-                  {isGenerating && <span className="inline-block w-0.5 h-4 bg-primary ml-0.5 animate-pulse-clinical" />}
-                </motion.div>
-              ) : (
-                <p className="text-sm text-muted-foreground/50 italic">
-                  A evolução gerada pela IA aparecerá aqui. Insira tópicos à esquerda e clique em "Gerar".
-                </p>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
-      </div>
-
-      {/* Histórico de Evoluções */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Histórico de Evoluções</h3>
-          <Select value={evoRoleFilter} onValueChange={setEvoRoleFilter}>
-            <SelectTrigger className={cn("w-[160px] h-8 text-xs", evoRoleFilter !== "Todos" && "border-primary text-primary")}>
-              <User className="w-3 h-3 mr-1" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {evoRoles.map((r) => (
-                <SelectItem key={r} value={r} className="text-xs">{r}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {sortedDates.length === 0 && (
-          <p className="text-sm text-muted-foreground/50 italic text-center py-6">Nenhuma evolução encontrada.</p>
-        )}
-
-        {sortedDates.map((date) => {
-          const isOpen = openEvoDates.includes(date);
-          return (
-            <div key={date}>
-              <button
-                onClick={() => setOpenEvoDates((prev) =>
-                  prev.includes(date) ? prev.filter((d) => d !== date) : [...prev, date]
-                )}
-                className="flex items-center gap-2 w-full py-2 px-3 rounded-lg hover:bg-secondary/60 transition-colors"
-              >
-                <ChevronRight className={cn("w-3.5 h-3.5 text-muted-foreground transition-transform duration-200", isOpen && "rotate-90")} />
-                <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
-                <span className="text-xs font-semibold text-foreground">
-                  {format(parseISO(date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-                </span>
-                <span className="text-[10px] text-muted-foreground ml-auto">
-                  {evolutionsByDate[date].length} {evolutionsByDate[date].length === 1 ? "registro" : "registros"}
-                </span>
-              </button>
-              <AnimatePresence initial={false}>
-                {isOpen && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                    className="overflow-hidden"
-                  >
-                    <div className="space-y-2 ml-5 border-l-2 border-border pl-4 pt-2 pb-1">
-                      {evolutionsByDate[date].sort((a, b) => b.time.localeCompare(a.time)).map((evo) => (
-                        <motion.div
-                          key={evo.id}
-                          initial={{ opacity: 0, x: -5 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          className="bg-card border rounded-xl p-4 clinical-shadow"
-                        >
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-medium text-foreground">{evo.professional}</span>
-                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">{evo.role}</span>
-                            </div>
-                            <span className="text-[10px] text-muted-foreground font-mono">{evo.time}</span>
-                          </div>
-                          <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{evo.content}</p>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          );
-        })}
+      <div className="bg-card border rounded-xl p-6 clinical-shadow text-center">
+        <p className="text-sm text-muted-foreground">Módulo de evolução IA em desenvolvimento.</p>
       </div>
     </div>
   );
 }
 
 /* ============ PRESCRIPTIONS TAB ============ */
-function PrescriptionsTab({ patientId }: { patientId: string }) {
-  const [filter, setFilter] = useState<"all" | "active" | "completed">("active");
-  const [dateFilter, setDateFilter] = React.useState<Date | undefined>(undefined);
-  const [roleFilter, setRoleFilter] = React.useState<string>("all");
-
-  const patientPrescriptions = prescriptions.filter((p) => p.patientId === patientId);
-
-  const getProfessionalRole = (name: string): string => {
-    if (name.startsWith("Dr.") || name.startsWith("Dra.")) return "Médico";
-    if (name.startsWith("Enf.")) return "Enfermagem";
-    if (name.startsWith("Ft.")) return "Fisioterapia";
-    return "Outro";
-  };
-
-  const filtered = patientPrescriptions.filter((p) => {
-    const statusMatch = filter === "all" ? true : filter === "active" ? p.status === "active" : p.status === "completed" || p.status === "suspended";
-    const dateMatch = dateFilter ? p.startDate === format(dateFilter, "yyyy-MM-dd") : true;
-    const roleMatch = roleFilter === "all" ? true : getProfessionalRole(p.prescribedBy) === roleFilter;
-    return statusMatch && dateMatch && roleMatch;
-  });
-
-  const allRxDates = [...new Set(filtered.map((r) => r.startDate))].sort((a, b) => b.localeCompare(a));
-  const [openRxDates, setOpenRxDates] = React.useState<string[]>(() => allRxDates.length > 0 ? [allRxDates[0]] : []);
-
-  const categoryColors: Record<string, string> = {
-    antibiotic: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20",
-    analgesic: "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20",
-    cardiovascular: "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20",
-    fluid: "bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border-cyan-500/20",
-    other: "bg-secondary text-muted-foreground border-border",
-  };
-
-  const categoryLabels: Record<string, string> = {
-    antibiotic: "Antibiótico",
-    analgesic: "Analgésico",
-    cardiovascular: "Cardiovascular",
-    fluid: "Hidratação",
-    other: "Outros",
-  };
-
-  const statusConfig = {
-    active: { label: "Ativo", cls: "risk-badge-stable" },
-    suspended: { label: "Suspenso", cls: "risk-badge-medium" },
-    completed: { label: "Concluído", cls: "bg-secondary text-muted-foreground text-[10px] px-2 py-0.5 rounded-full font-medium" },
-  };
-
-  const now = new Date();
-  const currentHour = `${String(now.getHours()).padStart(2, "0")}:00`;
-
+function PrescriptionsTab() {
   return (
-    <div className="space-y-5">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Pill className="w-5 h-5 text-primary" />
-          <div>
-            <h2 className="text-sm font-semibold text-foreground">Prescrições Médicas</h2>
-            <p className="text-xs text-muted-foreground">Medicamentos, dosagens e aprazamento</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3 flex-wrap">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className={cn("h-8 text-xs gap-2", dateFilter && "border-primary text-primary")}>
-                <Calendar className="w-3.5 h-3.5" />
-                {dateFilter ? format(dateFilter, "dd/MM/yyyy") : "Filtrar por data"}
-                {dateFilter && (
-                  <span
-                    role="button"
-                    className="ml-1 hover:text-destructive"
-                    onClick={(e) => { e.stopPropagation(); setDateFilter(undefined); }}
-                  >
-                    ×
-                  </span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <DayPicker
-                mode="single"
-                selected={dateFilter}
-                onSelect={setDateFilter}
-                initialFocus
-                className={cn("p-3 pointer-events-auto")}
-              />
-            </PopoverContent>
-          </Popover>
-
-          <Select value={roleFilter} onValueChange={setRoleFilter}>
-            <SelectTrigger className={cn("h-8 w-auto min-w-[180px] text-xs", roleFilter !== "all" && "border-primary text-primary")}>
-              <User className="w-3.5 h-3.5 mr-1.5" />
-              <SelectValue placeholder="Tipo de profissional" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os tipos</SelectItem>
-              <SelectItem value="Médico">Médico</SelectItem>
-              <SelectItem value="Enfermagem">Enfermagem</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+    <div className="space-y-6">
+      <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Prescrições</h2>
+      <div className="bg-card border rounded-xl p-6 clinical-shadow text-center">
+        <p className="text-sm text-muted-foreground">Nenhuma prescrição registrada ainda.</p>
       </div>
-
-      {/* Schedule Timeline */}
-      {(
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card border rounded-xl p-4 clinical-shadow">
-          <div className="flex items-center gap-2 mb-3">
-            <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-            <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Aprazamento — Próximos Horários</span>
-          </div>
-          <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-            {["06:00", "08:00", "12:00", "14:00", "16:00", "18:00", "20:00", "22:00"].map((time) => {
-              const medsAtTime = filtered.filter((p) => p.status === "active" && p.schedule.includes(time));
-              const isPast = time < currentHour;
-              return (
-                <div key={time} className={`rounded-lg border p-2 text-center ${isPast ? "opacity-50" : ""} ${medsAtTime.length > 0 ? "border-primary/30 bg-primary/5" : "border-border"}`}>
-                  <p className="text-[10px] font-mono font-semibold text-muted-foreground">{time}</p>
-                  {medsAtTime.length > 0 ? (
-                    <div className="mt-1 space-y-0.5">
-                      {medsAtTime.map((m) => (
-                        <p key={m.id} className="text-[10px] text-foreground truncate" title={`${m.medication} ${m.dose}`}>
-                          {m.medication.split(" ")[0]}
-                        </p>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-[10px] text-muted-foreground/40 mt-1">—</p>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </motion.div>
-      )}
-
-      {/* Medication List grouped by date */}
-      {(() => {
-        const groupedByDate = filtered.reduce<Record<string, typeof filtered>>((acc, rx) => {
-          const key = rx.startDate;
-          if (!acc[key]) acc[key] = [];
-          acc[key].push(rx);
-          return acc;
-        }, {});
-        const sortedDates = Object.keys(groupedByDate).sort((a, b) => b.localeCompare(a));
-
-        return (
-          <div className="space-y-3">
-            {filtered.length === 0 ? (
-              <div className="text-center py-10 text-muted-foreground text-sm">Nenhuma prescrição encontrada.</div>
-            ) : (
-              sortedDates.map((date) => {
-                const dateRxs = groupedByDate[date];
-                const formattedDate = format(parseISO(date), "dd/MM/yyyy");
-                const isOpen = openRxDates.includes(date);
-
-                return (
-                  <div key={date} className="bg-card border rounded-xl clinical-shadow overflow-hidden">
-                    <button
-                      onClick={() => setOpenRxDates((prev) => prev.includes(date) ? prev.filter((d) => d !== date) : [...prev, date])}
-                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-secondary/30 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${isOpen ? "rotate-0" : "-rotate-90"}`} />
-                        <span className="text-sm font-semibold text-foreground">{formattedDate}</span>
-                        <span className="text-xs text-muted-foreground">{dateRxs.length} {dateRxs.length === 1 ? "prescrição" : "prescrições"}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {dateRxs.filter((r) => r.status === "active").length > 0 && (
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600">{dateRxs.filter((r) => r.status === "active").length} ativa{dateRxs.filter((r) => r.status === "active").length > 1 ? "s" : ""}</span>
-                        )}
-                      </div>
-                    </button>
-
-                    {isOpen && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.2 }}
-                        className="border-t px-4 py-3 space-y-3"
-                      >
-                        {dateRxs.map((rx, i) => (
-                          <motion.div
-                            key={rx.id}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: i * 0.04 }}
-                            className={`bg-secondary/20 border rounded-lg p-4 ${rx.status === "completed" ? "opacity-60" : ""}`}
-                          >
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <h3 className="text-sm font-semibold text-foreground">{rx.medication}</h3>
-                                  <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${categoryColors[rx.category]}`}>
-                                    {categoryLabels[rx.category]}
-                                  </span>
-                                  <span className={statusConfig[rx.status].cls}>{statusConfig[rx.status].label}</span>
-                                </div>
-                                <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-1">
-                                  <div>
-                                    <span className="text-[10px] text-muted-foreground uppercase">Dose</span>
-                                    <p className="text-sm font-mono font-medium text-foreground">{rx.dose}</p>
-                                  </div>
-                                  <div>
-                                    <span className="text-[10px] text-muted-foreground uppercase">Via</span>
-                                    <p className="text-sm text-foreground">{rx.route}</p>
-                                  </div>
-                                  <div>
-                                    <span className="text-[10px] text-muted-foreground uppercase">Frequência</span>
-                                    <p className="text-sm text-foreground">{rx.frequency}</p>
-                                  </div>
-                                  <div>
-                                    <span className="text-[10px] text-muted-foreground uppercase">Horários</span>
-                                    <p className="text-sm font-mono text-foreground">
-                                      {rx.schedule.length > 0 ? rx.schedule.join(" · ") : "Contínuo"}
-                                    </p>
-                                  </div>
-                                </div>
-                                {rx.notes && (
-                                  <div className="mt-2 flex items-start gap-1.5">
-                                    <AlertTriangle className="w-3 h-3 text-muted-foreground mt-0.5 flex-shrink-0" />
-                                    <p className="text-xs text-muted-foreground italic">{rx.notes}</p>
-                                  </div>
-                                )}
-                              </div>
-                              <div className="text-right flex-shrink-0">
-                                <p className="text-[10px] text-muted-foreground">{rx.prescribedBy}</p>
-                                <p className="text-[10px] text-muted-foreground">
-                                  {rx.startDate}{rx.endDate ? ` → ${rx.endDate}` : ""}
-                                </p>
-                              </div>
-                            </div>
-                          </motion.div>
-                        ))}
-                      </motion.div>
-                    )}
-                  </div>
-                );
-              })
-            )}
-          </div>
-        );
-      })()}
     </div>
   );
 }
 
 /* ============ EXAMS TAB ============ */
 function ExamsTab() {
-  const groupedByDate = exams.reduce<Record<string, typeof exams>>((acc, ex) => {
-    if (!acc[ex.date]) acc[ex.date] = [];
-    acc[ex.date].push(ex);
-    return acc;
-  }, {});
-
-  const sortedDates = Object.keys(groupedByDate).sort((a, b) => b.localeCompare(a));
-  const [openDates, setOpenDates] = React.useState<string[]>(sortedDates.length > 0 ? [sortedDates[0]] : []);
-
-  const toggleDate = (date: string) => {
-    setOpenDates((prev) =>
-      prev.includes(date) ? prev.filter((d) => d !== date) : [...prev, date]
-    );
-  };
-
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <FileText className="w-5 h-5 text-primary" />
-        <div>
-          <h2 className="text-sm font-semibold text-foreground">Exames Laboratoriais</h2>
-          <p className="text-xs text-muted-foreground">Resultados com destaque automático para valores alterados</p>
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        {sortedDates.map((date) => {
-          const dateExams = groupedByDate[date];
-          const isOpen = openDates.includes(date);
-          const criticalCount = dateExams.filter((e) => e.status === "critical").length;
-          const alteredCount = dateExams.filter((e) => e.status === "altered").length;
-          const formattedDate = format(parseISO(date), "dd/MM/yyyy");
-
-          return (
-            <div key={date} className="bg-card border rounded-xl clinical-shadow overflow-hidden">
-              <button
-                onClick={() => toggleDate(date)}
-                className="w-full flex items-center justify-between px-4 py-3 hover:bg-secondary/30 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${isOpen ? "rotate-0" : "-rotate-90"}`} />
-                  <span className="text-sm font-semibold text-foreground">{formattedDate}</span>
-                  <span className="text-xs text-muted-foreground">{dateExams.length} exames</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  {criticalCount > 0 && (
-                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-risk-high/10 text-risk-high">{criticalCount} crítico{criticalCount > 1 ? "s" : ""}</span>
-                  )}
-                  {alteredCount > 0 && (
-                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-risk-medium/10 text-risk-medium">{alteredCount} alterado{alteredCount > 1 ? "s" : ""}</span>
-                  )}
-                </div>
-              </button>
-
-              {isOpen && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-t border-b bg-secondary/50">
-                        <th className="text-left px-4 py-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Exame</th>
-                        <th className="text-left px-4 py-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Resultado</th>
-                        <th className="text-left px-4 py-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Referência</th>
-                        <th className="text-left px-4 py-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      {dateExams.map((ex, i) => (
-                        <motion.tr
-                          key={ex.id}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: i * 0.03 }}
-                          className={ex.status === "critical" ? "bg-risk-high/5" : ex.status === "altered" ? "bg-risk-medium/5" : ""}
-                        >
-                          <td className="px-4 py-2.5 text-sm font-medium text-foreground">{ex.name}</td>
-                          <td className="px-4 py-2.5 font-mono text-sm font-semibold tracking-tight">
-                            {ex.value} <span className="text-xs text-muted-foreground font-normal">{ex.unit}</span>
-                          </td>
-                          <td className="px-4 py-2.5 text-xs text-muted-foreground">{ex.reference}</td>
-                          <td className="px-4 py-2.5">
-                            <ExamStatus status={ex.status} />
-                          </td>
-                        </motion.tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </motion.div>
-              )}
-            </div>
-          );
-        })}
+    <div className="space-y-6">
+      <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Exames</h2>
+      <div className="bg-card border rounded-xl p-6 clinical-shadow text-center">
+        <p className="text-sm text-muted-foreground">Nenhum exame registrado ainda.</p>
       </div>
     </div>
   );
 }
 
 /* ============ VITALS TAB ============ */
-function VitalsTab({ patient }: { patient: typeof patients[0] }) {
-  const vitalsData: { icon: React.ElementType; label: string; value: string | number; unit: string; data: (number | string)[]; danger: boolean; showMinMax?: boolean }[] = [
-    { icon: Heart, label: "Frequência Cardíaca", value: patient.vitals.fc[patient.vitals.fc.length - 1], unit: "bpm", data: patient.vitals.fc, danger: patient.vitals.fc[patient.vitals.fc.length - 1] > 100, showMinMax: true },
-    { icon: Droplets, label: "Saturação O₂", value: patient.vitals.satO2[patient.vitals.satO2.length - 1], unit: "%", data: patient.vitals.satO2, danger: patient.vitals.satO2[patient.vitals.satO2.length - 1] < 92, showMinMax: true },
-    { icon: Activity, label: "Pressão Arterial", value: patient.vitals.pa[patient.vitals.pa.length - 1], unit: "mmHg", data: patient.vitals.pa, danger: false, showMinMax: false },
-    { icon: Thermometer, label: "Temperatura", value: patient.vitals.temp[patient.vitals.temp.length - 1], unit: "°C", data: patient.vitals.temp, danger: patient.vitals.temp[patient.vitals.temp.length - 1] > 37.5, showMinMax: true },
-  ];
-
+function VitalsTab() {
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Activity className="w-5 h-5 text-primary" />
-        <div>
-          <h2 className="text-sm font-semibold text-foreground">Sinais Vitais</h2>
-          <p className="text-xs text-muted-foreground">Monitoramento contínuo com tendências</p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {vitalsData.map((v, i) => (
-          <motion.div
-            key={v.label}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-            className={`bg-card border rounded-xl p-5 clinical-shadow ${v.danger ? "border-risk-high/30" : ""}`}
-          >
-            <div className="flex items-center gap-2 mb-3">
-              <v.icon className={`w-4 h-4 ${v.danger ? "text-risk-high" : "text-muted-foreground"}`} />
-              <span className="text-xs text-muted-foreground uppercase tracking-wider">{v.label}</span>
-            </div>
-            <div className="flex items-end justify-between">
-              <p className={`vital-value text-3xl ${v.danger ? "text-risk-high" : "text-foreground"}`}>
-                {v.value} <span className="text-sm text-muted-foreground font-sans">{v.unit}</span>
-              </p>
-              {v.data && v.showMinMax !== false && (
-                <span className={`text-xs font-mono ${v.danger ? "text-risk-high" : "text-muted-foreground"}`}>
-                  {typeof v.data[0] === "number"
-                    ? `${Math.min(...(v.data as number[]))}–${Math.max(...(v.data as number[]))}`
-                    : `${v.data[0]}…${v.data[v.data.length - 1]}`}
-                </span>
-              )}
-            </div>
-            {v.data && (
-              <div className="mt-3 flex gap-2 text-[10px] text-muted-foreground">
-                {v.data.map((val, idx) => (
-                  <div key={idx} className="flex flex-col items-center">
-                    <span className="font-mono">{val}</span>
-                    <span>{idx}h</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </motion.div>
-        ))}
+    <div className="space-y-6">
+      <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Sinais Vitais</h2>
+      <div className="bg-card border rounded-xl p-6 clinical-shadow text-center">
+        <p className="text-sm text-muted-foreground">Nenhum registro de sinais vitais ainda.</p>
       </div>
     </div>
   );
-}
-
-/* ============ SHARED COMPONENTS ============ */
-function VitalCard({ icon: Icon, label, value, unit, data, danger }: {
-  icon: React.ElementType; label: string; value: string; unit: string; data?: (number | string)[]; danger?: boolean;
-}) {
-  const minMax = data && data.length > 0 && typeof data[0] === "number"
-    ? `${Math.min(...(data as number[]))}–${Math.max(...(data as number[]))}`
-    : null;
-
-  return (
-    <div className={`bg-card border rounded-xl p-3 clinical-shadow ${danger ? "border-risk-high/30" : ""}`}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
-          <Icon className={`w-3.5 h-3.5 ${danger ? "text-risk-high" : "text-muted-foreground"}`} />
-          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</span>
-        </div>
-        {minMax && (
-          <span className={`text-[10px] font-mono ${danger ? "text-risk-high" : "text-muted-foreground"}`}>
-            {minMax}
-          </span>
-        )}
-      </div>
-      <p className={`vital-value mt-1 ${danger ? "text-risk-high" : "text-foreground"}`}>
-        {value} <span className="text-xs text-muted-foreground font-sans">{unit}</span>
-      </p>
-    </div>
-  );
-}
-
-function ExamStatus({ status }: { status: "normal" | "altered" | "critical" }) {
-  const config = {
-    normal: { label: "Normal", cls: "risk-badge-stable" },
-    altered: { label: "Alterado", cls: "risk-badge-medium" },
-    critical: { label: "Crítico", cls: "risk-badge-high" },
-  };
-  const c = config[status];
-  return <span className={c.cls}>{c.label}</span>;
 }
