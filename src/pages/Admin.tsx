@@ -184,125 +184,22 @@ export default function Admin() {
           <div className="flex justify-end">
             <CreateHospitalDialog onCreated={fetchData} />
           </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="space-y-3">
             {hospitals.map((h) => {
               const count = links.filter((l) => l.hospital_id === h.id && l.ativo).length;
+              const hospitalSetores = setores.filter(s => s.hospital_id === h.id);
               return (
-                <Card key={h.id} className={!h.ativo ? "opacity-50" : ""}>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm flex items-center justify-between">
-                      {h.nome}
-                      <Badge variant={h.ativo ? "default" : "secondary"} className="text-[10px]">
-                        {h.ativo ? "Ativo" : "Inativo"}
-                      </Badge>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-xs text-muted-foreground">{h.cidade}, {h.estado}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{count} profissional(is) vinculado(s)</p>
-                  </CardContent>
-                </Card>
+                <HospitalCard
+                  key={h.id}
+                  hospital={h}
+                  profissionaisCount={count}
+                  setores={hospitalSetores}
+                  hospitals={hospitals}
+                  onUpdated={fetchData}
+                />
               );
             })}
           </div>
-        </TabsContent>
-
-        {/* PERMISSIONS TAB */}
-        <TabsContent value="permissions" className="space-y-4">
-          <div className="flex justify-end">
-            <LinkUserDialog hospitals={hospitals} profiles={profiles} onCreated={fetchData} />
-          </div>
-          <Card>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-xs">Profissional</TableHead>
-                    <TableHead className="text-xs">Hospital</TableHead>
-                    <TableHead className="text-xs">Papel</TableHead>
-                    <TableHead className="text-xs">Status</TableHead>
-                    <TableHead className="text-xs">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {links.map((l) => (
-                    <TableRow key={l.id}>
-                      <TableCell className="text-xs font-medium">{l.profile?.nome || "—"}</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">{l.hospital?.nome || "—"}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="text-[10px] capitalize">
-                          {ROLES.find(r => r.value === l.role)?.label || l.role}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={l.ativo ? "default" : "secondary"} className="text-[10px]">
-                          {l.ativo ? "Ativo" : "Inativo"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <UpdateLinkActions link={l} onUpdated={fetchData} />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        {/* SETORES TAB */}
-        <TabsContent value="setores" className="space-y-4">
-          <div className="flex justify-end">
-            <CreateSetorDialog hospitals={hospitals} onCreated={fetchData} />
-          </div>
-          {hospitals.filter(h => h.ativo).map((h) => {
-            const hospitalSetores = setores.filter(s => s.hospital_id === h.id);
-            if (hospitalSetores.length === 0 && hospitals.filter(ho => ho.ativo).length > 1) return null;
-            return (
-              <Card key={h.id}>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm flex items-center gap-2">
-                    <Building2 className="w-3.5 h-3.5 text-muted-foreground" />
-                    {h.nome}
-                    <Badge variant="secondary" className="text-[10px] ml-auto">
-                      {hospitalSetores.length} setor(es)
-                    </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  {hospitalSetores.length === 0 ? (
-                    <p className="text-xs text-muted-foreground px-6 pb-4">Nenhum setor cadastrado</p>
-                  ) : (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="text-xs">Setor</TableHead>
-                          <TableHead className="text-xs">Leitos</TableHead>
-                          <TableHead className="text-xs">Status</TableHead>
-                          <TableHead className="text-xs">Ações</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {hospitalSetores.map((s) => (
-                          <TableRow key={s.id}>
-                            <TableCell className="text-xs font-medium">{s.nome}</TableCell>
-                            <TableCell className="text-xs">{s.numero_leitos}</TableCell>
-                            <TableCell>
-                              <Badge variant={s.ativo ? "default" : "secondary"} className="text-[10px]">
-                                {s.ativo ? "Ativo" : "Inativo"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <ToggleSetorButton setor={s} onUpdated={fetchData} />
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
         </TabsContent>
       </Tabs>
     </div>
