@@ -41,6 +41,139 @@ export type Database = {
         }
         Relationships: []
       }
+      internacoes: {
+        Row: {
+          created_at: string
+          data_admissao: string
+          data_alta: string | null
+          diagnostico: string | null
+          hospital_id: string
+          id: string
+          leito: string | null
+          medico_responsavel_id: string | null
+          observacoes: string | null
+          paciente_id: string
+          risco: string
+          setor: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data_admissao?: string
+          data_alta?: string | null
+          diagnostico?: string | null
+          hospital_id: string
+          id?: string
+          leito?: string | null
+          medico_responsavel_id?: string | null
+          observacoes?: string | null
+          paciente_id: string
+          risco?: string
+          setor?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data_admissao?: string
+          data_alta?: string | null
+          diagnostico?: string | null
+          hospital_id?: string
+          id?: string
+          leito?: string | null
+          medico_responsavel_id?: string | null
+          observacoes?: string | null
+          paciente_id?: string
+          risco?: string
+          setor?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "internacoes_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "internacoes_medico_responsavel_id_fkey"
+            columns: ["medico_responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "internacoes_paciente_id_fkey"
+            columns: ["paciente_id"]
+            isOneToOne: false
+            referencedRelation: "pacientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pacientes: {
+        Row: {
+          cidade: string | null
+          contato_emergencia_nome: string | null
+          contato_emergencia_parentesco: string | null
+          contato_emergencia_telefone: string | null
+          convenio: string | null
+          cpf: string | null
+          created_at: string
+          data_nascimento: string
+          endereco: string | null
+          estado: string | null
+          id: string
+          nome: string
+          nome_mae: string | null
+          numero_convenio: string | null
+          sexo: string
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          cidade?: string | null
+          contato_emergencia_nome?: string | null
+          contato_emergencia_parentesco?: string | null
+          contato_emergencia_telefone?: string | null
+          convenio?: string | null
+          cpf?: string | null
+          created_at?: string
+          data_nascimento: string
+          endereco?: string | null
+          estado?: string | null
+          id?: string
+          nome: string
+          nome_mae?: string | null
+          numero_convenio?: string | null
+          sexo: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cidade?: string | null
+          contato_emergencia_nome?: string | null
+          contato_emergencia_parentesco?: string | null
+          contato_emergencia_telefone?: string | null
+          convenio?: string | null
+          cpf?: string | null
+          created_at?: string
+          data_nascimento?: string
+          endereco?: string | null
+          estado?: string | null
+          id?: string
+          nome?: string
+          nome_mae?: string | null
+          numero_convenio?: string | null
+          sexo?: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
