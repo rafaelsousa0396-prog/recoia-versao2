@@ -161,7 +161,7 @@ export const patients: Patient[] = [
     admissionDate: "2026-03-13",
     risk: "medium",
     status: "internado",
-    vitals: { fc: [85, 88, 84, 86, 87, 85], satO2: [95, 96, 95, 96, 95, 96], pa: "135/85", temp: 37.1 },
+    vitals: { fc: [85, 88, 84, 86, 87, 85], satO2: [95, 96, 95, 96, 95, 96], pa: ["135/85", "132/83", "138/88", "135/85", "134/84", "135/85"], temp: [37.1, 37.0, 37.2, 37.1, 37.1, 37.0] },
     alerts: ["Risco de TEP - profilaxia em andamento"],
   },
 ];
